@@ -1,0 +1,186 @@
+#!/usr/bin/env python
+#
+# BIDS conversion utility for collections of DICOM files
+#
+# Copyright (C) 2017, Robert Oostenveld
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+import os
+import sys
+import re
+import getopt
+
+if hasattr(sys, 'frozen'):
+    basis = sys.executable
+elif sys.argv[0]!='':
+    basis = sys.argv[0]
+else:
+    basis = './'
+installed_folder = os.path.split(basis)[0]
+
+# bin contains this file, lib contains shared modules
+sys.path.insert(0,os.path.join(installed_folder,'../lib'))
+import pydicom as dicom
+
+def help(name):
+    print ""
+    print "This script searches through a directory for DICOM files and writes"
+    print "them to the output screen in such a way that you can easily make a script"
+    print "to reorganize them to a BIDS structure."
+    print ""
+    print "You should save the output to a script, edit the script and then execute it."
+    print ""
+    print "Use as"
+    print '  %s -c <command> -o <outputdir> [inputdir]' % name
+    print ""
+    print "Optional arguments"
+    print "   -c <command>   command to execute, eg. mv or cp"
+    print "   -x             do not check file extensions"
+    
+# set the defaults
+command = "cp"
+outputdir = "FIXME"
+checkextension = True
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:],"hxc:o:",["command=","outputdir="])
+except getopt.GetoptError:
+    help(sys.argv[0])
+    sys.exit(2)
+for opt, arg in opts:
+    if opt == '-h':
+        help(sys.argv[0])
+        sys.exit()
+    elif opt in ("-c", "--command"):
+        command = arg
+    elif opt in ("-o", "--outputdir"):
+        outputdir = arg
+    elif opt in ("-x"):
+        checkextension = False
+            
+inputdirs = args
+if len(inputdirs)<1:
+    help(sys.argv[0])
+    sys.exit(2)
+
+rootlist = []
+filelist = []
+for dir in inputdirs:
+    print '# scanning directory structure starting at %s' % dir
+    for root, dirs, files in os.walk(dir):
+        for file in files:
+            if (checkextension and re.match('.*IMA$', file) or re.match('.*\.ima$', file) or re.match('.*\.DCM$', file) or re.match('.*\.dcm$', file)) or not checkextension:
+                rootlist.append(root)
+                filelist.append(file)
+
+print '# found %d dicom files in %d directories' % (len(filelist), len(set(rootlist)))
+
+patientlist = []
+protocollist = []
+seriesnumberlist = []
+print('# getting dicom headers, this may take a while...')
+for root, file in zip(rootlist, filelist):
+    ds = dicom.read_file(os.path.join(root, file))
+    patientlist.append(ds.PatientName)
+    protocollist.append(ds.ProtocolName)
+    seriesnumberlist.append(ds.SeriesNumber)
+
+identifierlist = []
+for root, file, patient in zip(rootlist, filelist, patientlist):
+    # add a tuble with the directory and the patient ID, exclude the file name
+    identifier = (root, patient)
+    identifierlist.append(identifier)
+
+uniquepatient = sorted(list(set(patientlist)))
+uniqueprotocol = sorted(list(set(map(lambda n,s: '%03d-%s' % (n, s), seriesnumberlist, protocollist))))
+uniqueidentifier = sorted(list(set(identifierlist)))
+
+print '# found %d patient IDs' % len(uniquepatient)
+print '# found %d protocols' % len(uniqueprotocol)
+print '# constructed %d different identifiers from patient IDs and directories' % len(uniqueidentifier)
+
+sub=1 # this is incremented
+ses=1 # this remains the same
+subdir = []
+sesdir = []
+subvar = []
+sesvar = []
+for identifier in uniqueidentifier:
+    subdir.append("sub-%03d"    % sub)
+    subvar.append("SUB%03d"     % sub)
+    sesdir.append("ses-mri%02d" % ses)
+    sesvar.append("SES%02d"     % sub)  # note that this is correct, datasets are numbered sequentially in SUB and SES
+    sub += 1
+    
+index=1
+protdir = []
+protvar = []
+for protocol in uniqueprotocol:
+    protdir.append(protocol) # fixme, check that the name is valid for a directory
+    protvar.append("PROT%03d" % index)
+    index+=1
+    
+print""
+print "# please verify the following general variables"
+print "OUTPUTDIR=%s" % outputdir
+print "COMMAND=%s" % command
+
+# give some examples
+print ""
+print "#COMMAND=cp"
+print "#COMMAND=mv"
+
+print""
+print "# please verify the following subject and session identifier variables"
+for subv,subd,sesv,sesd,identifier in zip(subvar,subdir,sesvar,sesdir,uniqueidentifier):
+    print "%s=%s ; %s=%s  # %s" % (subv,subd,sesv,sesd,identifier)
+
+print""
+print "# please verify the following protocol variables"
+for protv,protd in zip(protvar,protdir):
+    print "%s=%s" % (protv,protd)
+
+print ""    
+print "###### the script should not need any changes below this line ######"
+
+print ""    
+print "# create the target directory structure"
+for subv,sesv in zip(subvar,sesvar):
+    for protv in protvar:
+        print "mkdir -p %s" % os.path.join("$OUTPUTDIR", "$"+subv, "$"+sesv, "$"+protv)
+
+print ""    
+print "# copy all the files"
+
+previous=None
+for root,file,identifier,protocol,seriesnumber in zip(rootlist, filelist, identifierlist, protocollist, seriesnumberlist):
+    index_id = uniqueidentifier.index(identifier)
+    index_pr = uniqueprotocol.index('%03d-%s' % (seriesnumber, protocol))
+    if previous!=(index_id,index_pr):
+        # place a blank line between blocks of dicom files with the same identifier and protocol
+        # this facilitates visual parsing of the bash script
+        if previous!=None:
+            # no empty line at the start
+            print ''
+        previous=(index_id,index_pr)
+    fullfile1 = os.path.join(root, file)
+    fullfile2 = os.path.join("$OUTPUTDIR", '$'+subvar[index_id], '$'+sesvar[index_id], '$'+protvar[index_pr], file)
+    print "$COMMAND \"%s\" \"%s\"" % (fullfile1, fullfile2)
+    
+print ""    
+print "# remove empty directories"
+print "find $OUTPUTDIR -type d -empty -delete"
+

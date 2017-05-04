@@ -1,8 +1,12 @@
 # BIDS tools
 
-This repository contains a number of tools for handling BIDS data structures. If you have suggestions or contributions, please fork the repository, make the changes in your clone and send me a pull request.
+This repository contains tools to support the [BIDS](http://bids.neuroimaging.io/) data structure. Specifically, it contains a tool for BIDS-ifying DICOM datasets and for CTF datasets. 
+
+If you have suggestions or contributions, please fork the repository, make the changes in your clone and send me a pull request.
 
 ## bin/reorganize_dicom_dataset
+
+//Also check out [heudiconv](https://github.com/nipy/heudiconv), which is a similar tool with more features, but also more complexity.//
 
 This is a BIDS conversion utility to reorganize existing MRI DICOM datasets. It works on a collection of DICOM files in a single directory or over multiple directories. It copies or moves the files according to the standard BIDS structure that we started using from 2017 onwards at the DCCN.
 
@@ -25,6 +29,7 @@ It is an executable Python script which you can run from the Linux command line.
      -x             do not check file extensions
 ```
 
+Following this tool, you would probably continue with converting the DICOM files in the "source" structure into NIfTI files.  
 
 ## bin/reorganize_ctf_dataset
 

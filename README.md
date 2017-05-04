@@ -6,7 +6,7 @@ If you have suggestions or contributions, please fork the repository, make the c
 
 ## bin/reorganize_dicom_dataset
 
-//Also check out [heudiconv](https://github.com/nipy/heudiconv), which is a similar tool with more features, but also more complexity.//
+*Also check out [heudiconv](https://github.com/nipy/heudiconv), which is a similar tool with more features, but also more complexity.*
 
 This is a BIDS conversion utility to reorganize existing MRI DICOM datasets. It works on a collection of DICOM files in a single directory or over multiple directories. It copies or moves the files according to the standard BIDS structure that we started using from 2017 onwards at the DCCN.
 

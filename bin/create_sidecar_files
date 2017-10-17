@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+#
+# BIDS helper utility to create the sidecar files
+#
+# Copyright (C) 2017, Robert Oostenveld
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+import os
+import sys
+import re
+import getopt
+
+if hasattr(sys, 'frozen'):
+    basis = sys.executable
+elif sys.argv[0]!='':
+    basis = sys.argv[0]
+else:
+    basis = './'
+installed_folder = os.path.split(basis)[0]
+
+# bin contains this file, lib contains shared modules
+sys.path.insert(0,os.path.join(installed_folder,'../lib'))
+
+def help(name):
+    print ""
+    print "This script parses all subjects and sessions in a BIDS dataset"
+    print "and creates the required/optional sidecar files."
+    print ""
+    print "Use as"
+    print '  %s [options] [inputdir]' % name
+    print ""
+    print "Supported options include the following"
+    print "  -t,--test          do not create the files, just print which files would be created"
+    print "  -f,--force         overwrite existing files, the default is not to overwrite"
+    print ""
+
+# set the defaults
+test = False
+force = False
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:],"htf",["test","force"])
+except getopt.GetoptError:
+    help(sys.argv[0])
+    sys.exit(2)
+for opt, arg in opts:
+    if opt == '-h':
+        help(sys.argv[0])
+        sys.exit()
+    elif opt in ("-t", "--test"):
+        test = True
+    elif opt in ("-f", "--force"):
+        force = True
+
+inputdirs = args
+if len(inputdirs)!=1:
+    help(sys.argv[0])
+    sys.exit(2)
+
+root = inputdirs[0]
+print root
+
+datatype = ['anat', 'dwi', 'func', 'fmap', 'beh', 'meg', 'eeg', 'ieeg']
+
+for subj in os.listdir(root):
+    if re.match('^sub-[a-zA-Z0-9]*$', subj):
+        print subj
+        for ses in os.listdir(os.path.join(root, subj)):
+            if re.match('^ses-[a-zA-Z0-9]*$', ses):
+                print ses
+                for typ in os.listdir(os.path.join(root, subj)):
+                    if ( typ in datatype ): 
+                        print typ
+

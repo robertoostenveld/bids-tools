@@ -112,6 +112,7 @@ print "OUTPUTDIR=%s" % outputdir
 print ""
 print "#COMMAND=newDs -anon"
 print "#COMMAND=moveDs"
+print "#COMMAND=copyDs"
 print ""
 print "# this is needed for newDs"
 print "module load 32bit/ctf/5.40"

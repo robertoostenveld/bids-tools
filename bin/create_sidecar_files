@@ -71,17 +71,119 @@ if len(inputdirs)!=1:
     sys.exit(2)
 
 root = inputdirs[0]
-print root
 
 datatype = ['anat', 'dwi', 'func', 'fmap', 'beh', 'meg', 'eeg', 'ieeg']
 
-for subj in os.listdir(root):
-    if re.match('^sub-[a-zA-Z0-9]*$', subj):
-        print subj
-        for ses in os.listdir(os.path.join(root, subj)):
-            if re.match('^ses-[a-zA-Z0-9]*$', ses):
-                print ses
-                for typ in os.listdir(os.path.join(root, subj)):
-                    if ( typ in datatype ): 
-                        print typ
+hasSub = False
+hasSes = False
+hasTyp = False
 
+# def writeTSV(filename, table):
+# def writeJSON(filename, table):
+
+####################################################################################
+
+def createSidecarANAT(root, sub, ses):
+    print "createSidecarANAT", root, sub, ses
+    sidecar = {
+    }
+
+def createSidecarDWI(root, sub, ses):
+    print "createSidecarDWI", root, sub, ses
+
+def createSidecarFUNC(root, sub, ses):
+    print "createSidecarFUNC", root, sub, ses
+
+def createSidecarFMAP(root, sub, ses):
+    print "createSidecarFMAP", root, sub, ses
+
+def createSidecarBEH(root, sub, ses):
+    print "createSidecarBEH", root, sub, ses
+
+def createSidecarMEG(root, sub, ses):
+    print "createSidecarMEG", root, sub, ses
+
+def createSidecarEEG(root, sub, ses):
+    print "createSidecarEEG", root, sub, ses
+
+def createSidecarIEEG(root, sub, ses):
+    print "createSidecarIEEG", root, sub, ses
+
+####################################################################################
+
+def createSidecarSessions(root, sub):
+    print "createSidecarSessions", root, sub
+
+####################################################################################
+
+def createSidecarParticipants(root):
+    print "createSidecarParticipants", root
+    participant_id = [];
+    sex = [];
+    age = [];
+    for sub in os.listdir(root):
+        if re.match('^sub-[a-zA-Z0-9]*$', sub):
+            participant_id.append(sub)
+            sex.append('unknown')
+            age.append('unknown')
+    header = ['participant_id', 'sex', 'age']
+    table = {'participant_id': participant_id, 'sex': sex, 'age': age}
+    # print header, table
+
+
+# loop over all subjects, sessions and data types
+for sub in os.listdir(root):
+    if re.match('^sub-[a-zA-Z0-9]*$', sub):
+        hasSub = True
+        for ses in os.listdir(os.path.join(root, sub)):
+            # sub-001/ses-mri01
+            if re.match('^ses-[a-zA-Z0-9]*$', ses):
+                hasSes = True
+                for typ in os.listdir(os.path.join(root, sub)):
+                    # sub-001/ses-mri01/anat
+                    if ( typ in datatype ):
+                        hasTyp = True
+                        if typ=='anat':
+                            createSidecarANAT(root, sub, ses)
+                        elif typ=='dwi':
+                            createSidecarDWI(root, sub, ses)
+                        elif typ=='func':
+                            createSidecarFUNC(root, sub, ses)
+                        elif typ=='fmap':
+                            createSidecarFMAP(root, sub, ses)
+                        elif typ=='meg':
+                            createSidecarMEG(root, sub, ses)
+                        elif typ=='eeg':
+                            createSidecarEEG(root, sub, ses)
+                        elif typ=='ieeg':
+                            createSidecarIEEG(root, sub, ses)
+
+        for typ in os.listdir(os.path.join(root, sub)):
+            # sub-001/anat
+            ses = None
+            if ( typ in datatype ):
+                hasTyp = True
+                if typ=='anat':
+                    createSidecarANAT(root, sub, ses)
+                elif typ=='dwi':
+                    createSidecarDWI(root, sub, ses)
+                elif typ=='func':
+                    createSidecarFUNC(root, sub, ses)
+                elif typ=='fmap':
+                    createSidecarFMAP(root, sub, ses)
+                elif typ=='meg':
+                    createSidecarMEG(root, sub, ses)
+                elif typ=='eeg':
+                    createSidecarEEG(root, sub, ses)
+                elif typ=='ieeg':
+                    createSidecarIEEG(root, sub, ses)
+    if hasSes:
+        createSidecarSessions(root, sub)
+
+if hasSub:
+    createSidecarParticipants(root)
+
+# write the dataset_description.json file
+# write the CHANGES file
+# write the README file
+# write the TASK file(s)

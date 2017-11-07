@@ -2,6 +2,11 @@
 #
 # BIDS helper utility to create the sidecar files
 #
+# Specification for MRI  https://docs.google.com/document/d/1HFUkAEE-pB-angVcYe6pf_-fVf4sCpOHKesUvfb8Grc/edit#
+# Specification for MEG  https://docs.google.com/document/d/1FWex_kSPWVh_f4rKgd5rxJmxlboAPtQlmBc1gyZlRZM/edit#
+# Specification for EEG  https://docs.google.com/document/d/1ArMZ9Y_quTKXC-jNXZksnedK2VHHoKP3HCeO5HPcgLE/edit#
+# Specification for iEEG https://docs.google.com/document/d/1qMUkoaXzRMlJuOcfTYNr3fTsrl4SewWjffjMD5Ew6GY/edit#
+#
 # Copyright (C) 2017, Robert Oostenveld
 #
 # This program is free software; you can redistribute it and/or modify
@@ -24,6 +29,7 @@ import re
 import getopt
 import csv
 import json
+from collections import OrderedDict
 
 if hasattr(sys, 'frozen'):
     basis = sys.executable
@@ -90,16 +96,20 @@ def writeASCII(filename, data):
     with open(filename, 'w') as asciifile:
         asciifile.write(data)
 
-def writeTSV(filename, header, data):
+def writeTSV(filename, data):
     if not force and os.path.exists(filename):
         print "skipping existing file", filename
         return
     print "writing", filename
     with open(filename, 'w') as tsvfile:
         writer = csv.writer(tsvfile, delimiter='\t')
-        writer.writerow(header)
-        for row in zip(*map((lambda x: data[x]), header)):
-            writer.writerow(row)
+        writer.writerow(data.keys())
+        try:
+            for row in zip(*map((lambda x: data[x]), data.keys())):
+                writer.writerow(row)
+        except:
+            # this happens if the columns are empty or of unequal length
+            pass
 
 def writeJSON(filename, data):
     if not force and os.path.exists(filename):
@@ -167,8 +177,51 @@ def createSidecarBEH(root, sub, ses):
     }
 
 def createSidecarMEG(root, sub, ses):
-    print "createSidecarMEG", root, sub, ses
-    sidecar = {
+    typ = 'meg'
+    if not os.path.exists(os.path.join(root, sub, ses, typ)):
+        typ = ''
+
+    # SESSION specific files
+    # _fid.json
+    # _photo.jpg
+    # _fidinfo.txt
+    # _headshape.<manufacturer_specific_format>
+    # scans.tsv
+    filename = os.path.join(root, sub, ses, typ, sub + ses + '_fidinfo.txt')
+    writeASCII(filename, '')
+    filename = os.path.join(root, sub, ses, typ, sub + ses + '_fid.json')
+    fid = {
+        'MEGCoordinateSystem': 'n/a',
+        'MEGCoordinateSystemDescription': 'n/a',
+        'EEGCoordinateSystem': 'n/a',
+        'EEGCoordinateUnits': 'n/a',
+        'EEGCoordinateSystemDescription': 'n/a',
+        'IntendedFor': 'n/a',
+        'AnatomicalMRICoordinateSystem': 'n/a',
+        'AnatomicalMRICoordinateSystemDescription': 'n/a',
+        'CoilCoordinates': 'n/a',
+        'CoilCoordinateSystem': 'n/a',
+        'CoilCoordinateUnits': 'n/a',
+        'CoilCoordinateSystemDescription': 'n/a',
+        'LandmarkCoordinates': 'n/a',
+        'LandmarkCoordinateSystem': 'n/a',
+        'LandmarkCoordinateUnits': 'n/a',
+        'LandmarkCoordinateSystemDescription': 'n/a',
+        'DigitizedHeadPoints': 'n/a',
+        'DigitizedHeadPointsCoordinateSystem': 'n/a',
+        'DigitizedHeadPointsCoordinateUnits': 'n/a',
+        'DigitizedHeadPointsCoordinateSystemDescription': 'n/a',
+    }
+    writeJSON(filename, fid)
+    scans = OrderedDict(filename=None, acq_time=None)
+    filename = os.path.join(root, sub, ses, typ, 'scans.tsv')
+    writeTSV(filename, scans)
+
+    # RUN specific files
+    # _meg.json:  A JSON document containing metadata about the MEG recording data file.
+    # _channels.tsv: A channels .tsv file listing channel names, types, and other optional information.
+    # _events.tsv: A .tsv file listing the event latency and description.
+    meg = {
         'InstitutionName': 'n/a',
         'InstitutionAddress': 'n/a',
         'Manufacturer': 'n/a',
@@ -204,10 +257,20 @@ def createSidecarMEG(root, sub, ses):
         'DigitizedLandmarks': 'n/a',
         'DigitizedHeadPoints': 'n/a'
     }
+    channels = OrderedDict(name=None, type=None, description=None, sampling_frequency=None, low_cutoff=None, high_cutoff=None, notch=None, software_filters=None, status=None)
+    events = OrderedDict(onset=None, duration=None, trial_type=None, response_time=None, stim_file=None, HED=None)
+    for run in listMEGruns(os.path.join(root, sub, ses, typ)):
+        (run, ext) = os.path.splitext(run)
+        filename = os.path.join(root, sub, ses, typ, sub + '_' + ses + '_' + run + '_meg.json')
+        writeJSON(filename, meg)
+        filename = os.path.join(root, sub, ses, typ, sub + '_' + ses + '_' + run + '_channels.tsv')
+        writeTSV(filename, channels)
+        filename = os.path.join(root, sub, ses, typ, sub + '_' + ses + '_' + run + '_events.tsv')
+        writeTSV(filename, events)
 
 def createSidecarEEG(root, sub, ses):
     print "createSidecarEEG", root, sub, ses
-    sidecar = {
+    eeg = {
         'InstitutionName': 'n/a',
         'InstitutionAddress': 'n/a',
         'Manufacturer': 'n/a',
@@ -217,7 +280,19 @@ def createSidecarEEG(root, sub, ses):
 
 def createSidecarIEEG(root, sub, ses):
     print "createSidecarIEEG", root, sub, ses
-    sidecar = {
+    # SESSION specific files
+    # _channels.tsv
+    # _acq-<label>_electrodes.tsv
+    # _acq-<label>_electrodes.json
+    # _photo.jpg
+    # _electrodesinfo.txt
+    # scans.tsv
+
+    # RUN specific files
+    # _ieeg.json
+    # _events.tsv
+
+    ieeg = {
         'InstitutionName': 'n/a',
         'InstitutionAddress': 'n/a',
         'Manufacturer': 'n/a',
@@ -233,35 +308,33 @@ def createSidecarSessions(root, sub):
     for ses in os.listdir(os.path.join(root, sub)):
         if re.match('^ses-[a-zA-Z0-9]*$', ses):
             session.append(ses)
-    header = ['session']
     data = {'session': session}
-    writeTSV(filename, header, data)
+    writeTSV(filename, data)
 
 ####################################################################################
 
 def createSidecarREADME(root):
     filename = os.path.join(root, 'README')
     writeASCII(filename, (
-    'README\n'
-    '======\n'
+    'Describe the dataset here\n'
     ))
 
 def createSidecarCHANGES(root):
     filename = os.path.join(root, 'CHANGES')
     writeASCII(filename, (
-    'CHANGES\n'
-    '=======\n'
+    'YYY-MM-DD\n'
+    '  - describe the changes here ...\n'
     ))
 
 
 def createSidecarTask(root, task):
-    print "createSidecarTask", root, task
+    filename = os.path.join(root, 'task-' + task + '.json')
     sidecar = {
         "TaskName": 'n/a'
     }
 
 def createSidecarDatasetDescription(root):
-    filename = os.path.join(root, 'DatasetDescription.json')
+    filename = os.path.join(root, 'dataset_description.json')
     sidecar = {
         "BIDSVersion": "1.0.0",
         "License": "n/a",
@@ -280,9 +353,16 @@ def createSidecarParticipants(root):
             participant_id.append(sub)
             sex.append('unknown')
             age.append('unknown')
-    header = ['participant_id', 'sex', 'age']
-    table = {'participant_id': participant_id, 'sex': sex, 'age': age}
-    writeTSV(filename, header, table)
+    data = OrderedDict(participant_id=participant_id, sex=sex, age=age)
+    writeTSV(filename, data)
+
+################################################################################################
+def listMEGruns(root):
+    runs = []
+    for file in os.listdir(root):
+        if re.match('^.*\.ds$', file):
+            runs.append(file)
+    return runs
 
 ################################################################################################
 # the following section deals with parsing the directory and file structure
@@ -325,6 +405,9 @@ for sub in os.listdir(root):
                             createSidecarEEG(root, sub, ses)
                         elif typ=='ieeg':
                             createSidecarIEEG(root, sub, ses)
+                if not hasTyp:
+                    if len(listMEGruns(os.path.join(root, sub, ses)))>0:
+                        createSidecarMEG(root, sub, ses)
 
         for typ in os.listdir(os.path.join(root, sub)):
             if not os.path.isdir(os.path.join(root, sub, typ)):
@@ -347,6 +430,9 @@ for sub in os.listdir(root):
                     createSidecarEEG(root, sub, ses)
                 elif typ=='ieeg':
                     createSidecarIEEG(root, sub, ses)
+        if not hasTyp:
+            if len(listMEGruns(os.path.join(root, sub)))>0:
+                createSidecarMEG(root, sub)
 
     if hasSes:
         createSidecarSessions(root, sub)

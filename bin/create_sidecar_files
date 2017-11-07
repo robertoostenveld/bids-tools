@@ -22,6 +22,8 @@ import os
 import sys
 import re
 import getopt
+import csv
+import json
 
 if hasattr(sys, 'frozen'):
     basis = sys.executable
@@ -78,46 +80,198 @@ hasSub = False
 hasSes = False
 hasTyp = False
 
-# def writeTSV(filename, table):
-# def writeJSON(filename, table):
+####################################################################################
+
+def writeASCII(filename, data):
+    if not force and os.path.exists(filename):
+        print "skipping existing file", filename
+        return
+    print "writing", filename
+    with open(filename, 'w') as asciifile:
+        asciifile.write(data)
+
+def writeTSV(filename, header, data):
+    if not force and os.path.exists(filename):
+        print "skipping existing file", filename
+        return
+    print "writing", filename
+    with open(filename, 'w') as tsvfile:
+        writer = csv.writer(tsvfile, delimiter='\t')
+        writer.writerow(header)
+        for row in zip(*map((lambda x: data[x]), header)):
+            writer.writerow(row)
+
+def writeJSON(filename, data):
+    if not force and os.path.exists(filename):
+        print "skipping existing file", filename
+        return
+    print "writing", filename
+    with open(filename, 'w') as jsonfile:
+        json.dump(data, jsonfile, indent=2)
 
 ####################################################################################
 
 def createSidecarANAT(root, sub, ses):
     print "createSidecarANAT", root, sub, ses
     sidecar = {
+        'InstitutionName': 'n/a',
+        'InstitutionAddress': 'n/a',
+        'Manufacturer': 'n/a',
+        'ManufacturersModelName': 'n/a',
+        'DeviceSerialNumber': 'n/a',
     }
 
 def createSidecarDWI(root, sub, ses):
     print "createSidecarDWI", root, sub, ses
+    sidecar = {
+        'InstitutionName': 'n/a',
+        'InstitutionAddress': 'n/a',
+        'Manufacturer': 'n/a',
+        'ManufacturersModelName': 'n/a',
+        'DeviceSerialNumber': 'n/a',
+    }
 
 def createSidecarFUNC(root, sub, ses):
     print "createSidecarFUNC", root, sub, ses
+    sidecar = {
+        'InstitutionName': 'n/a',
+        'InstitutionAddress': 'n/a',
+        'Manufacturer': 'n/a',
+        'ManufacturersModelName': 'n/a',
+        'TaskName': 'n/a',
+        'TaskDescription': 'n/a',
+        'Instructions': 'n/a',
+        'CogAtlasID': 'n/a',
+        'CogPOID': 'n/a',
+        'DeviceSerialNumber': 'n/a',
+    }
 
 def createSidecarFMAP(root, sub, ses):
     print "createSidecarFMAP", root, sub, ses
+    sidecar = {
+        'InstitutionName': 'n/a',
+        'InstitutionAddress': 'n/a',
+        'Manufacturer': 'n/a',
+        'ManufacturersModelName': 'n/a',
+        'DeviceSerialNumber': 'n/a',
+    }
 
 def createSidecarBEH(root, sub, ses):
     print "createSidecarBEH", root, sub, ses
+    sidecar = {
+        'InstitutionName': 'n/a',
+        'InstitutionAddress': 'n/a',
+        'Manufacturer': 'n/a',
+        'ManufacturersModelName': 'n/a',
+        'DeviceSerialNumber': 'n/a',
+    }
 
 def createSidecarMEG(root, sub, ses):
     print "createSidecarMEG", root, sub, ses
+    sidecar = {
+        'InstitutionName': 'n/a',
+        'InstitutionAddress': 'n/a',
+        'Manufacturer': 'n/a',
+        'ManufacturersModelName': 'n/a',
+        'TaskName': 'n/a',
+        'TaskDescription': 'n/a',
+        'Instructions': 'n/a',
+        'CogAtlasID': 'n/a',
+        'CogPOID': 'n/a',
+        'DeviceSerialNumber': 'n/a',
+        'SamplingFrequency': 'n/a',
+        'PowerLineFrequency': 'n/a',
+        'MEGChannelCount': 'n/a',
+        'MEGREFChannelCount': 'n/a',
+        'EEGChannelCount': 'n/a',
+        'EOGChannelCount': 'n/a',
+        'ECGChannelCount': 'n/a',
+        'EMGChannelCount': 'n/a',
+        'MiscChannelCount': 'n/a',
+        'TriggerChannelCount': 'n/a',
+        'EEGPlacementScheme': 'n/a',
+        'EEGReference': 'n/a',
+        'DewarPosition': 'n/a',
+        'SoftwareFilters': 'n/a',
+        'RecordingDuration': 'n/a',
+        'RecordingType': 'n/a',
+        'EpochLength': 'n/a',
+        'DeviceSoftwareVersions': 'n/a',
+        'ContinuousHeadLocalization': 'n/a',
+        'CoilFrequency': 'n/a',
+        'MaxMovement': 'n/a',
+        'SubjectArtefactDescription': 'n/a',
+        'DigitizedLandmarks': 'n/a',
+        'DigitizedHeadPoints': 'n/a'
+    }
 
 def createSidecarEEG(root, sub, ses):
     print "createSidecarEEG", root, sub, ses
+    sidecar = {
+        'InstitutionName': 'n/a',
+        'InstitutionAddress': 'n/a',
+        'Manufacturer': 'n/a',
+        'ManufacturersModelName': 'n/a',
+        'DeviceSerialNumber': 'n/a',
+    }
 
 def createSidecarIEEG(root, sub, ses):
     print "createSidecarIEEG", root, sub, ses
+    sidecar = {
+        'InstitutionName': 'n/a',
+        'InstitutionAddress': 'n/a',
+        'Manufacturer': 'n/a',
+        'ManufacturersModelName': 'n/a',
+        'DeviceSerialNumber': 'n/a',
+    }
 
 ####################################################################################
 
 def createSidecarSessions(root, sub):
-    print "createSidecarSessions", root, sub
+    filename = os.path.join(root, sub, 'sessions.tsv')
+    session = [];
+    for ses in os.listdir(os.path.join(root, sub)):
+        if re.match('^ses-[a-zA-Z0-9]*$', ses):
+            session.append(ses)
+    header = ['session']
+    data = {'session': session}
+    writeTSV(filename, header, data)
 
 ####################################################################################
 
+def createSidecarREADME(root):
+    filename = os.path.join(root, 'README')
+    writeASCII(filename, (
+    'README\n'
+    '======\n'
+    ))
+
+def createSidecarCHANGES(root):
+    filename = os.path.join(root, 'CHANGES')
+    writeASCII(filename, (
+    'CHANGES\n'
+    '=======\n'
+    ))
+
+
+def createSidecarTask(root, task):
+    print "createSidecarTask", root, task
+    sidecar = {
+        "TaskName": 'n/a'
+    }
+
+def createSidecarDatasetDescription(root):
+    filename = os.path.join(root, 'DatasetDescription.json')
+    sidecar = {
+        "BIDSVersion": "1.0.0",
+        "License": "n/a",
+        "Name": "n/a",
+        "ReferencesAndLinks": "n/a"
+    }
+    writeJSON(filename, sidecar)
+
 def createSidecarParticipants(root):
-    print "createSidecarParticipants", root
+    filename = os.path.join(root, 'participants.tsv')
     participant_id = [];
     sex = [];
     age = [];
@@ -128,18 +282,32 @@ def createSidecarParticipants(root):
             age.append('unknown')
     header = ['participant_id', 'sex', 'age']
     table = {'participant_id': participant_id, 'sex': sex, 'age': age}
-    # print header, table
+    writeTSV(filename, header, table)
 
+################################################################################################
+# the following section deals with parsing the directory and file structure
+################################################################################################
+
+subList = []
+taskList = []
 
 # loop over all subjects, sessions and data types
 for sub in os.listdir(root):
+    if not os.path.isdir(os.path.join(root, sub)):
+        continue
+    # sub-001
     if re.match('^sub-[a-zA-Z0-9]*$', sub):
         hasSub = True
+        subList.append(sub)
         for ses in os.listdir(os.path.join(root, sub)):
+            if not os.path.isdir(os.path.join(root, sub, ses)):
+                continue
             # sub-001/ses-mri01
             if re.match('^ses-[a-zA-Z0-9]*$', ses):
                 hasSes = True
                 for typ in os.listdir(os.path.join(root, sub)):
+                    if not os.path.isdir(os.path.join(root, sub, ses, typ)):
+                        continue
                     # sub-001/ses-mri01/anat
                     if ( typ in datatype ):
                         hasTyp = True
@@ -159,8 +327,10 @@ for sub in os.listdir(root):
                             createSidecarIEEG(root, sub, ses)
 
         for typ in os.listdir(os.path.join(root, sub)):
-            # sub-001/anat
+            if not os.path.isdir(os.path.join(root, sub, typ)):
+                continue
             ses = None
+            # sub-001/anat
             if ( typ in datatype ):
                 hasTyp = True
                 if typ=='anat':
@@ -177,13 +347,16 @@ for sub in os.listdir(root):
                     createSidecarEEG(root, sub, ses)
                 elif typ=='ieeg':
                     createSidecarIEEG(root, sub, ses)
+
     if hasSes:
         createSidecarSessions(root, sub)
 
 if hasSub:
+    createSidecarREADME(root)
+    createSidecarCHANGES(root)
     createSidecarParticipants(root)
-
-# write the dataset_description.json file
-# write the CHANGES file
-# write the README file
-# write the TASK file(s)
+    createSidecarDatasetDescription(root)
+    for task in taskList:
+        createSidecarTask(root, task)
+else:
+    print 'ERROR: this directory is not organized according to BIDS'

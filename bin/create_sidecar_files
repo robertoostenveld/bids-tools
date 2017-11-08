@@ -41,6 +41,8 @@ installed_folder = os.path.split(basis)[0]
 
 # bin contains this file, lib contains shared modules
 sys.path.insert(0,os.path.join(installed_folder,'../lib'))
+from pybids import sidecar
+from pybids import channels
 
 def help(name):
     print ""
@@ -138,58 +140,18 @@ def writeTSV(filename, data):
 
 def createSidecarANAT(root, sub, ses):
     print "createSidecarANAT", root, sub, ses
-    sidecar = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
 
 def createSidecarDWI(root, sub, ses):
     print "createSidecarDWI", root, sub, ses
-    sidecar = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
 
 def createSidecarFUNC(root, sub, ses):
     print "createSidecarFUNC", root, sub, ses
-    sidecar = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'TaskName': 'n/a',
-        'TaskDescription': 'n/a',
-        'Instructions': 'n/a',
-        'CogAtlasID': 'n/a',
-        'CogPOID': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
 
 def createSidecarFMAP(root, sub, ses):
     print "createSidecarFMAP", root, sub, ses
-    sidecar = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
 
 def createSidecarBEH(root, sub, ses):
     print "createSidecarBEH", root, sub, ses
-    sidecar = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
 
 def createSidecarMEG(root, sub, ses):
     typ = 'meg'
@@ -200,124 +162,27 @@ def createSidecarMEG(root, sub, ses):
         dirname = os.path.join(root, sub, ses, typ)
         basename = sub + '_' + ses
 
-    # SESSION specific files
-    # _fid.json
-    # _photo.jpg
-    # _fidinfo.txt
-    # _headshape.<manufacturer_specific_format>
-    # scans.tsv
     filename = os.path.join(dirname, basename + '_fidinfo.txt')
-    writeASCII(filename, '')
+    writeASCII(filename, sidecar.meg.fidinfo)
     filename = os.path.join(dirname, basename + '_fid.json')
-    fid = {
-        'MEGCoordinateSystem': 'n/a',
-        'MEGCoordinateSystemDescription': 'n/a',
-        'EEGCoordinateSystem': 'n/a',
-        'EEGCoordinateUnits': 'n/a',
-        'EEGCoordinateSystemDescription': 'n/a',
-        'IntendedFor': 'n/a',
-        'AnatomicalMRICoordinateSystem': 'n/a',
-        'AnatomicalMRICoordinateSystemDescription': 'n/a',
-        'CoilCoordinates': 'n/a',
-        'CoilCoordinateSystem': 'n/a',
-        'CoilCoordinateUnits': 'n/a',
-        'CoilCoordinateSystemDescription': 'n/a',
-        'LandmarkCoordinates': 'n/a',
-        'LandmarkCoordinateSystem': 'n/a',
-        'LandmarkCoordinateUnits': 'n/a',
-        'LandmarkCoordinateSystemDescription': 'n/a',
-        'DigitizedHeadPoints': 'n/a',
-        'DigitizedHeadPointsCoordinateSystem': 'n/a',
-        'DigitizedHeadPointsCoordinateUnits': 'n/a',
-        'DigitizedHeadPointsCoordinateSystemDescription': 'n/a',
-    }
-    writeJSON(filename, fid)
-    scans = OrderedDict(filename=None, acq_time=None)
-    filename = os.path.join(dirname, 'scans.tsv')
-    writeTSV(filename, scans)
+    writeJSON(filename, sidecar.meg.fid)
+    filename = os.path.join(dirname, basename + '_scans.tsv')
+    writeTSV(filename, sidecar.meg.scans)
 
-    # RUN specific files
-    # _meg.json:  A JSON document containing metadata about the MEG recording data file.
-    # _channels.tsv: A channels .tsv file listing channel names, types, and other optional information.
-    # _events.tsv: A .tsv file listing the event latency and description.
-    meg = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'TaskName': 'n/a',
-        'TaskDescription': 'n/a',
-        'Instructions': 'n/a',
-        'CogAtlasID': 'n/a',
-        'CogPOID': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-        'SamplingFrequency': 'n/a',
-        'PowerLineFrequency': 'n/a',
-        'MEGChannelCount': 'n/a',
-        'MEGREFChannelCount': 'n/a',
-        'EEGChannelCount': 'n/a',
-        'EOGChannelCount': 'n/a',
-        'ECGChannelCount': 'n/a',
-        'EMGChannelCount': 'n/a',
-        'MiscChannelCount': 'n/a',
-        'TriggerChannelCount': 'n/a',
-        'EEGPlacementScheme': 'n/a',
-        'EEGReference': 'n/a',
-        'DewarPosition': 'n/a',
-        'SoftwareFilters': 'n/a',
-        'RecordingDuration': 'n/a',
-        'RecordingType': 'n/a',
-        'EpochLength': 'n/a',
-        'DeviceSoftwareVersions': 'n/a',
-        'ContinuousHeadLocalization': 'n/a',
-        'CoilFrequency': 'n/a',
-        'MaxMovement': 'n/a',
-        'SubjectArtefactDescription': 'n/a',
-        'DigitizedLandmarks': 'n/a',
-        'DigitizedHeadPoints': 'n/a'
-    }
-    channels = OrderedDict(name=None, type=None, description=None, sampling_frequency=None, low_cutoff=None, high_cutoff=None, notch=None, software_filters=None, status=None)
-    events = OrderedDict(onset=None, duration=None, trial_type=None, response_time=None, stim_file=None, HED=None)
     for run in listMEGruns(os.path.join(dirname)):
         (run, ext) = os.path.splitext(run)
-        filename = os.path.join(dirname, basename + '_' + run + '_meg.json')
-        writeJSON(filename, meg)
-        filename = os.path.join(dirname, basename + '_' + run + '_channels.tsv')
-        writeTSV(filename, channels)
-        filename = os.path.join(dirname, basename + '_' + run + '_events.tsv')
-        writeTSV(filename, events)
+        filename = os.path.join(dirname, run + '_meg.json')
+        writeJSON(filename, sidecar.meg.meg)
+        filename = os.path.join(dirname, run + '_channels.tsv')
+        writeTSV(filename, sidecar.meg.channels)
+        filename = os.path.join(dirname, run + '_events.tsv')
+        writeTSV(filename, sidecar.meg.events)
 
 def createSidecarEEG(root, sub, ses):
     print "createSidecarEEG", root, sub, ses
-    eeg = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
 
 def createSidecarIEEG(root, sub, ses):
     print "createSidecarIEEG", root, sub, ses
-    # SESSION specific files
-    # _channels.tsv
-    # _acq-<label>_electrodes.tsv
-    # _acq-<label>_electrodes.json
-    # _photo.jpg
-    # _electrodesinfo.txt
-    # scans.tsv
-
-    # RUN specific files
-    # _ieeg.json
-    # _events.tsv
-
-    ieeg = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
 
 def createSidecarSessions(root, sub):
     filename = os.path.join(root, sub, 'sessions.tsv')
@@ -330,46 +195,29 @@ def createSidecarSessions(root, sub):
 
 def createSidecarREADME(root):
     filename = os.path.join(root, 'README')
-    writeASCII(filename, (
-    'Describe the dataset here\n'
-    ))
+    writeASCII(filename, sidecar.readme)
 
 def createSidecarCHANGES(root):
     filename = os.path.join(root, 'CHANGES')
-    writeASCII(filename, (
-    'YYY-MM-DD\n'
-    '  - describe the changes here ...\n'
-    ))
-
+    writeASCII(filename, sidecar.changes)
 
 def createSidecarTask(root, task):
     filename = os.path.join(root, 'task-' + task + '.json')
-    sidecar = {
-        "TaskName": 'n/a'
-    }
+    writeJSON(filename, sidecar.task)
 
 def createSidecarDatasetDescription(root):
     filename = os.path.join(root, 'dataset_description.json')
-    sidecar = {
-        "BIDSVersion": "1.0.0",
-        "License": "n/a",
-        "Name": "n/a",
-        "ReferencesAndLinks": "n/a"
-    }
-    writeJSON(filename, sidecar)
+    writeJSON(filename, sidecar.dataset_description)
 
 def createSidecarParticipants(root):
     filename = os.path.join(root, 'participants.tsv')
-    participant_id = [];
-    sex = [];
-    age = [];
+    participants = sidecar.participants
     for sub in os.listdir(root):
         if re.match('^sub-[a-zA-Z0-9]*$', sub):
-            participant_id.append(sub)
-            sex.append('unknown')
-            age.append('unknown')
-    data = OrderedDict(participant_id=participant_id, sex=sex, age=age)
-    writeTSV(filename, data)
+            participants['participant_id'].append(sub)
+            participants['sex'].append('n/a')
+            participants['age'].append('n/a')
+    writeTSV(filename, participants)
 
 ################################################################################################
 def listMEGruns(root):

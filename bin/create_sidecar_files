@@ -89,35 +89,50 @@ hasTyp = False
 ####################################################################################
 
 def writeASCII(filename, data):
+    if test:
+        prefix = 'TEST: '
+    else:
+        prefix = ''
     if not force and os.path.exists(filename):
-        print "skipping existing file", filename
-        return
-    print "writing", filename
-    with open(filename, 'w') as asciifile:
-        asciifile.write(data)
-
-def writeTSV(filename, data):
-    if not force and os.path.exists(filename):
-        print "skipping existing file", filename
-        return
-    print "writing", filename
-    with open(filename, 'w') as tsvfile:
-        writer = csv.writer(tsvfile, delimiter='\t')
-        writer.writerow(data.keys())
-        try:
-            for row in zip(*map((lambda x: data[x]), data.keys())):
-                writer.writerow(row)
-        except:
-            # this happens if the columns are empty or of unequal length
-            pass
+        print prefix + "skipping", filename
+    else:
+        print prefix + "writing", filename
+        if not test:
+            with open(filename, 'w') as asciifile:
+                asciifile.write(data)
 
 def writeJSON(filename, data):
+    if test:
+        prefix = 'TEST: '
+    else:
+        prefix = ''
     if not force and os.path.exists(filename):
-        print "skipping existing file", filename
-        return
-    print "writing", filename
-    with open(filename, 'w') as jsonfile:
-        json.dump(data, jsonfile, indent=2)
+        print prefix + "skipping", filename
+    else:
+        print prefix + "writing", filename
+        if not test:
+            with open(filename, 'w') as jsonfile:
+                json.dump(data, jsonfile, indent=2)
+
+def writeTSV(filename, data):
+    if test:
+        prefix = 'TEST: '
+    else:
+        prefix = ''
+    if not force and os.path.exists(filename):
+        print prefix + "skipping", filename
+    else:
+        print prefix + "writing", filename
+        if not test:
+            with open(filename, 'w') as tsvfile:
+                writer = csv.writer(tsvfile, delimiter='\t')
+                writer.writerow(data.keys())
+                try:
+                    for row in zip(*map((lambda x: data[x]), data.keys())):
+                        writer.writerow(row)
+                except:
+                    # this happens if the columns are empty or of unequal length
+                    pass
 
 ####################################################################################
 
@@ -178,8 +193,12 @@ def createSidecarBEH(root, sub, ses):
 
 def createSidecarMEG(root, sub, ses):
     typ = 'meg'
-    if not os.path.exists(os.path.join(root, sub, ses, typ)):
-        typ = ''
+    if ses==None:
+        dirname = os.path.join(root, sub, typ)
+        basename = sub
+    else:
+        dirname = os.path.join(root, sub, ses, typ)
+        basename = sub + '_' + ses
 
     # SESSION specific files
     # _fid.json
@@ -187,9 +206,9 @@ def createSidecarMEG(root, sub, ses):
     # _fidinfo.txt
     # _headshape.<manufacturer_specific_format>
     # scans.tsv
-    filename = os.path.join(root, sub, ses, typ, sub + ses + '_fidinfo.txt')
+    filename = os.path.join(dirname, basename + '_fidinfo.txt')
     writeASCII(filename, '')
-    filename = os.path.join(root, sub, ses, typ, sub + ses + '_fid.json')
+    filename = os.path.join(dirname, basename + '_fid.json')
     fid = {
         'MEGCoordinateSystem': 'n/a',
         'MEGCoordinateSystemDescription': 'n/a',
@@ -214,7 +233,7 @@ def createSidecarMEG(root, sub, ses):
     }
     writeJSON(filename, fid)
     scans = OrderedDict(filename=None, acq_time=None)
-    filename = os.path.join(root, sub, ses, typ, 'scans.tsv')
+    filename = os.path.join(dirname, 'scans.tsv')
     writeTSV(filename, scans)
 
     # RUN specific files
@@ -259,13 +278,13 @@ def createSidecarMEG(root, sub, ses):
     }
     channels = OrderedDict(name=None, type=None, description=None, sampling_frequency=None, low_cutoff=None, high_cutoff=None, notch=None, software_filters=None, status=None)
     events = OrderedDict(onset=None, duration=None, trial_type=None, response_time=None, stim_file=None, HED=None)
-    for run in listMEGruns(os.path.join(root, sub, ses, typ)):
+    for run in listMEGruns(os.path.join(dirname)):
         (run, ext) = os.path.splitext(run)
-        filename = os.path.join(root, sub, ses, typ, sub + '_' + ses + '_' + run + '_meg.json')
+        filename = os.path.join(dirname, basename + '_' + run + '_meg.json')
         writeJSON(filename, meg)
-        filename = os.path.join(root, sub, ses, typ, sub + '_' + ses + '_' + run + '_channels.tsv')
+        filename = os.path.join(dirname, basename + '_' + run + '_channels.tsv')
         writeTSV(filename, channels)
-        filename = os.path.join(root, sub, ses, typ, sub + '_' + ses + '_' + run + '_events.tsv')
+        filename = os.path.join(dirname, basename + '_' + run + '_events.tsv')
         writeTSV(filename, events)
 
 def createSidecarEEG(root, sub, ses):
@@ -300,8 +319,6 @@ def createSidecarIEEG(root, sub, ses):
         'DeviceSerialNumber': 'n/a',
     }
 
-####################################################################################
-
 def createSidecarSessions(root, sub):
     filename = os.path.join(root, sub, 'sessions.tsv')
     session = [];
@@ -310,8 +327,6 @@ def createSidecarSessions(root, sub):
             session.append(ses)
     data = {'session': session}
     writeTSV(filename, data)
-
-####################################################################################
 
 def createSidecarREADME(root):
     filename = os.path.join(root, 'README')
@@ -362,6 +377,8 @@ def listMEGruns(root):
     for file in os.listdir(root):
         if re.match('^.*\.ds$', file):
             runs.append(file)
+        if re.match('^.*\.fif$', file):
+            runs.append(file)
     return runs
 
 ################################################################################################
@@ -406,8 +423,9 @@ for sub in os.listdir(root):
                         elif typ=='ieeg':
                             createSidecarIEEG(root, sub, ses)
                 if not hasTyp:
-                    if len(listMEGruns(os.path.join(root, sub, ses)))>0:
-                        createSidecarMEG(root, sub, ses)
+                    raise NameError('ERROR: type is missing')
+                    # if len(listMEGruns(os.path.join(root, sub, ses)))>0:
+                    #    createSidecarMEG(root, sub, ses)
 
         for typ in os.listdir(os.path.join(root, sub)):
             if not os.path.isdir(os.path.join(root, sub, typ)):
@@ -431,8 +449,9 @@ for sub in os.listdir(root):
                 elif typ=='ieeg':
                     createSidecarIEEG(root, sub, ses)
         if not hasTyp:
-            if len(listMEGruns(os.path.join(root, sub)))>0:
-                createSidecarMEG(root, sub)
+            raise NameError('ERROR: type is missing')
+            # if len(listMEGruns(os.path.join(root, sub)))>0:
+            #    createSidecarMEG(root, sub)
 
     if hasSes:
         createSidecarSessions(root, sub)

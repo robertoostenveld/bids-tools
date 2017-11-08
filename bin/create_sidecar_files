@@ -45,24 +45,24 @@ from pybids import sidecar
 from pybids import channels
 
 def help(name):
-    print ""
-    print "This script parses all subjects and sessions in a BIDS dataset"
-    print "and creates the required/optional sidecar files."
-    print ""
-    print "Use as"
+    print ''
+    print 'This script parses all subjects and sessions in a BIDS dataset'
+    print 'and creates the required/optional sidecar files.'
+    print ''
+    print 'Use as'
     print '  %s [options] [inputdir]' % name
-    print ""
-    print "Supported options include the following"
-    print "  -t,--test          do not create the files, just print which files would be created"
-    print "  -f,--force         overwrite existing files, the default is not to overwrite"
-    print ""
+    print ''
+    print 'Supported options include the following'
+    print '  -t,--test          do not create the files, just print which files would be created'
+    print '  -f,--force         overwrite existing files, the default is not to overwrite'
+    print ''
 
 # set the defaults
 test = False
 force = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:],"htf",["test","force"])
+    opts, args = getopt.getopt(sys.argv[1:],'htf',['test','force'])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -70,9 +70,9 @@ for opt, arg in opts:
     if opt == '-h':
         help(sys.argv[0])
         sys.exit()
-    elif opt in ("-t", "--test"):
+    elif opt in ('-t', '--test'):
         test = True
-    elif opt in ("-f", "--force"):
+    elif opt in ('-f', '--force'):
         force = True
 
 inputdirs = args
@@ -96,9 +96,9 @@ def writeASCII(filename, data):
     else:
         prefix = ''
     if not force and os.path.exists(filename):
-        print prefix + "skipping", filename
+        print prefix + 'skipping', filename
     else:
-        print prefix + "writing", filename
+        print prefix + 'writing', filename
         if not test:
             with open(filename, 'w') as asciifile:
                 asciifile.write(data)
@@ -109,9 +109,9 @@ def writeJSON(filename, data):
     else:
         prefix = ''
     if not force and os.path.exists(filename):
-        print prefix + "skipping", filename
+        print prefix + 'skipping', filename
     else:
-        print prefix + "writing", filename
+        print prefix + 'writing', filename
         if not test:
             with open(filename, 'w') as jsonfile:
                 json.dump(data, jsonfile, indent=2)
@@ -122,9 +122,9 @@ def writeTSV(filename, data):
     else:
         prefix = ''
     if not force and os.path.exists(filename):
-        print prefix + "skipping", filename
+        print prefix + 'skipping', filename
     else:
-        print prefix + "writing", filename
+        print prefix + 'writing', filename
         if not test:
             with open(filename, 'w') as tsvfile:
                 writer = csv.writer(tsvfile, delimiter='\t')
@@ -139,19 +139,19 @@ def writeTSV(filename, data):
 ####################################################################################
 
 def createSidecarANAT(root, sub, ses):
-    print "createSidecarANAT", root, sub, ses
+    print 'createSidecarANAT', root, sub, ses
 
 def createSidecarDWI(root, sub, ses):
-    print "createSidecarDWI", root, sub, ses
+    print 'createSidecarDWI', root, sub, ses
 
 def createSidecarFUNC(root, sub, ses):
-    print "createSidecarFUNC", root, sub, ses
+    print 'createSidecarFUNC', root, sub, ses
 
 def createSidecarFMAP(root, sub, ses):
-    print "createSidecarFMAP", root, sub, ses
+    print 'createSidecarFMAP', root, sub, ses
 
 def createSidecarBEH(root, sub, ses):
-    print "createSidecarBEH", root, sub, ses
+    print 'createSidecarBEH', root, sub, ses
 
 def createSidecarMEG(root, sub, ses):
     typ = 'meg'
@@ -179,10 +179,10 @@ def createSidecarMEG(root, sub, ses):
         writeTSV(filename, sidecar.meg.events)
 
 def createSidecarEEG(root, sub, ses):
-    print "createSidecarEEG", root, sub, ses
+    print 'createSidecarEEG', root, sub, ses
 
 def createSidecarIEEG(root, sub, ses):
-    print "createSidecarIEEG", root, sub, ses
+    print 'createSidecarIEEG', root, sub, ses
 
 def createSidecarSessions(root, sub):
     filename = os.path.join(root, sub, 'sessions.tsv')

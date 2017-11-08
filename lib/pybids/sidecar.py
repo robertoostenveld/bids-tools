@@ -1,7 +1,7 @@
 
 from collections import OrderedDict
 
-# there are a few top-level classes
+# there are a few top-level variables
 # there is a class for each data type  ['anat', 'dwi', 'func', 'fmap', 'beh', 'meg', 'eeg', 'ieeg']
 
 ####################################################################################
@@ -17,15 +17,15 @@ changes = (
 
 ####################################################################################
 dataset_description = {
-    "BIDSVersion": "1.0.0",
-    "License": "n/a",
-    "Name": "n/a",
-    "ReferencesAndLinks": "n/a"
+    'BIDSVersion': '1.0.0',
+    'License': 'n/a',
+    'Name': 'n/a',
+    'ReferencesAndLinks': 'n/a'
 }
 
 ####################################################################################
 task = {
-    "TaskName": 'n/a'
+    'TaskName': 'n/a'
 }
 
 ####################################################################################
@@ -40,58 +40,96 @@ sessions['session_id'] = []
 sessions['acq_time'] = []
 
 ####################################################################################
-class anat:
-    anat = {
+class shared:
+    scanner = {
         'InstitutionName': 'n/a',
         'InstitutionAddress': 'n/a',
         'Manufacturer': 'n/a',
         'ManufacturersModelName': 'n/a',
         'DeviceSerialNumber': 'n/a',
+        'DeviceSoftwareVersions': 'n/a',
     }
 
-####################################################################################
-class dwi:
-    dwi =  {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
+    mrsequence = {
+        'RepetitionTime': 'n/a',
+        'EchoTime': 'n/a',
+        'FlipAngle': 'n/a',
+        'SliceTiming': 'n/a',
+        'MultibandAccelerationFactor': 'n/a',
+        'ParallelReductionFactorInPlane': 'n/a',
+        'PhaseEncodingDirection': 'n/a',
     }
 
-####################################################################################
-class func:
-    func = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
+    task = {
         'TaskName': 'n/a',
         'TaskDescription': 'n/a',
         'Instructions': 'n/a',
         'CogAtlasID': 'n/a',
         'CogPOID': 'n/a',
-        'DeviceSerialNumber': 'n/a',
+    }
+
+    electrophys = {
+        'SamplingFrequency': 'n/a',
+        'PowerLineFrequency': 'n/a',
+        'RecordingDuration': 'n/a',
+        'RecordingType': 'n/a',
+        'EpochLength': 'n/a',
+        'SubjectArtefactDescription': 'n/a',
     }
 
 ####################################################################################
+class anat:
+    anat = {};
+    for d in (shared.scanner, shared.mrsequence):
+        anat.update(d)
+
+    scans = OrderedDict()
+    scans['filename'] = []
+    scans['acq_time'] = []
+
+####################################################################################
+class dwi:
+    dwi = {};
+    for d in (shared.scanner, shared.mrsequence):
+        dwi.update(d)
+
+    scans = OrderedDict()
+    scans['filename'] = []
+    scans['acq_time'] = []
+
+####################################################################################
+class func:
+    bold = {};
+    for d in (shared.scanner, shared.mrsequence, shared.task):
+        bold.update(d)
+
+    scans = OrderedDict()
+    scans['filename'] = []
+    scans['acq_time'] = []
+
+    events = OrderedDict()
+    events['onset'] = []
+    events['duration'] = []
+    events['trial_type'] = []
+    events['response_time'] = []
+    events['stim_file'] = []
+    events['HED'] = []
+
+####################################################################################
 class fmap:
-    fmap = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
+    fmap = {};
+    for d in (shared.scanner, shared.mrsequence):
+        fmap.update(d)
+
+    scans = OrderedDict()
+    scans['filename'] = []
+    scans['acq_time'] = []
 
 ####################################################################################
 class beh:
     beh = {
         'InstitutionName': 'n/a',
         'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
     }
 
 ####################################################################################
@@ -138,18 +176,6 @@ class meg:
     # _events.tsv
 
     meg = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'TaskName': 'n/a',
-        'TaskDescription': 'n/a',
-        'Instructions': 'n/a',
-        'CogAtlasID': 'n/a',
-        'CogPOID': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-        'SamplingFrequency': 'n/a',
-        'PowerLineFrequency': 'n/a',
         'MEGChannelCount': 'n/a',
         'MEGREFChannelCount': 'n/a',
         'EEGChannelCount': 'n/a',
@@ -162,17 +188,14 @@ class meg:
         'EEGReference': 'n/a',
         'DewarPosition': 'n/a',
         'SoftwareFilters': 'n/a',
-        'RecordingDuration': 'n/a',
-        'RecordingType': 'n/a',
-        'EpochLength': 'n/a',
-        'DeviceSoftwareVersions': 'n/a',
         'ContinuousHeadLocalization': 'n/a',
         'CoilFrequency': 'n/a',
         'MaxMovement': 'n/a',
-        'SubjectArtefactDescription': 'n/a',
         'DigitizedLandmarks': 'n/a',
         'DigitizedHeadPoints': 'n/a'
     }
+    for d in (shared.scanner, shared.task, shared.electrophys):
+        meg.update(d)
 
     channels = OrderedDict()
     channels['name'] = []
@@ -216,13 +239,9 @@ class eeg:
     # _channels.tsv
     # _events.tsv
 
-    eeg = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
+    eeg = {}
+    for d in (shared.scanner, shared.task, shared.electrophys):
+        eeg.update(d)
 
     channels = OrderedDict()
     channels['name'] = []
@@ -270,13 +289,9 @@ class ieeg:
     # _channels.tsv
     # _events.tsv
 
-    ieeg = {
-        'InstitutionName': 'n/a',
-        'InstitutionAddress': 'n/a',
-        'Manufacturer': 'n/a',
-        'ManufacturersModelName': 'n/a',
-        'DeviceSerialNumber': 'n/a',
-    }
+    ieeg = {}
+    for d in (shared.scanner, shared.task, shared.electrophys):
+        ieeg.update(d)
 
     channels = OrderedDict()
     channels['name'] = []

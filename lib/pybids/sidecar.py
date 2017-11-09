@@ -5,42 +5,9 @@ from collections import OrderedDict
 # there is a class for each data type  ['anat', 'dwi', 'func', 'fmap', 'beh', 'meg', 'eeg', 'ieeg']
 
 ####################################################################################
-readme = (
-    'Describe the dataset here\n'
-)
-
+# the common class describes elements that are shared among multiple data types
 ####################################################################################
-changes = (
-    'YYYY-MM-DD\n'
-    '  - describe the changes here ...\n'
-)
-
-####################################################################################
-dataset_description = {
-    'BIDSVersion': '1.0.0',
-    'License': 'n/a',
-    'Name': 'n/a',
-    'ReferencesAndLinks': 'n/a'
-}
-
-####################################################################################
-task = {
-    'TaskName': 'n/a'
-}
-
-####################################################################################
-participants = OrderedDict()
-participants['participant_id'] = []
-participants['sex'] = []
-participants['age'] = []
-
-####################################################################################
-sessions = OrderedDict()
-sessions['session_id'] = []
-sessions['acq_time'] = []
-
-####################################################################################
-class shared:
+class common:
     scanner = {
         'InstitutionName': 'n/a',
         'InstitutionAddress': 'n/a',
@@ -68,7 +35,7 @@ class shared:
         'CogPOID': 'n/a',
     }
 
-    electrophys = {
+    amplifier = {
         'SamplingFrequency': 'n/a',
         'PowerLineFrequency': 'n/a',
         'RecordingDuration': 'n/a',
@@ -77,35 +44,28 @@ class shared:
         'SubjectArtefactDescription': 'n/a',
     }
 
-####################################################################################
-class anat:
-    anat = {};
-    for d in (shared.scanner, shared.mrsequence):
-        anat.update(d)
-
     scans = OrderedDict()
     scans['filename'] = []
     scans['acq_time'] = []
 
-####################################################################################
-class dwi:
-    dwi = {};
-    for d in (shared.scanner, shared.mrsequence):
-        dwi.update(d)
+    electrodes = OrderedDict()
+    electrodes['name'] = []
+    electrodes['x'] = []
+    electrodes['y'] = []
+    electrodes['z'] = []
+    electrodes['type'] = []
+    electrodes['material'] = []
 
-    scans = OrderedDict()
-    scans['filename'] = []
-    scans['acq_time'] = []
-
-####################################################################################
-class func:
-    bold = {};
-    for d in (shared.scanner, shared.mrsequence, shared.task):
-        bold.update(d)
-
-    scans = OrderedDict()
-    scans['filename'] = []
-    scans['acq_time'] = []
+    channels = OrderedDict()
+    channels['name'] = []
+    channels['type'] = []
+    channels['description'] = []
+    channels['sampling_frequency'] = []
+    channels['low_cutoff'] = []
+    channels['high_cutoff'] = []
+    channels['notch'] = []
+    channels['software_filters'] = []
+    channels['status'] = []
 
     events = OrderedDict()
     events['onset'] = []
@@ -116,14 +76,98 @@ class func:
     events['HED'] = []
 
 ####################################################################################
-class fmap:
-    fmap = {};
-    for d in (shared.scanner, shared.mrsequence):
-        fmap.update(d)
+readme = (
+    'Describe the dataset here ...\n'
+)
 
-    scans = OrderedDict()
-    scans['filename'] = []
-    scans['acq_time'] = []
+####################################################################################
+changes = (
+    'YYYY-MM-DD\n'
+    '  - describe the changes here ...\n'
+)
+
+####################################################################################
+dataset_description = {
+    'BIDSVersion': '1.0.2',
+    'License': 'n/a',
+    'Name': 'n/a',
+    'ReferencesAndLinks': 'n/a'
+}
+
+####################################################################################
+task = {
+    'TaskName': 'n/a'
+}
+
+####################################################################################
+participants = OrderedDict()
+participants['participant_id'] = []
+participants['sex'] = []
+participants['age'] = []
+
+####################################################################################
+sessions = OrderedDict()
+sessions['session_id'] = []
+sessions['acq_time'] = []
+
+####################################################################################
+class anat:
+    # SESSION specific files
+    # _scans.tsv
+
+    scans = common.scans
+
+    # RUN specific files
+    # anat.json
+
+    anat = {};
+    for d in (common.scanner, common.mrsequence):
+        anat.update(d)
+
+####################################################################################
+class dwi:
+    # SESSION specific files
+    # _scans.tsv
+
+    scans = common.scans
+
+    # RUN specific files
+    # _dwi.json
+
+    dwi = {};
+    for d in (common.scanner, common.mrsequence):
+        dwi.update(d)
+
+####################################################################################
+class func:
+    # SESSION specific files
+    # _scans.tsv
+
+    scans = common.scans
+
+    # RUN specific files
+    # _bold.json
+    # _events.tsv
+
+    bold = {};
+    for d in (common.scanner, common.mrsequence, common.task):
+        bold.update(d)
+
+    events = common.events
+
+####################################################################################
+class fmap:
+    # SESSION specific files
+    # _scans.tsv
+
+    scans = common.scans
+
+    # RUN specific files
+    # fmap.json
+
+    fmap = {};
+    for d in (common.scanner, common.mrsequence):
+        fmap.update(d)
 
 ####################################################################################
 class beh:
@@ -140,6 +184,8 @@ class meg:
     # _fidinfo.txt
     # _scans.tsv
     # _headshape.<manufacturer_specific_format>
+
+    scans = common.scans
 
     fid = {
         'MEGCoordinateSystem': 'n/a',
@@ -166,10 +212,6 @@ class meg:
 
     fidinfo = ''
 
-    scans = OrderedDict()
-    scans['filename'] = []
-    scans['acq_time'] = []
-
     # RUN specific files
     # _meg.json
     # _channels.tsv
@@ -194,27 +236,12 @@ class meg:
         'DigitizedLandmarks': 'n/a',
         'DigitizedHeadPoints': 'n/a'
     }
-    for d in (shared.scanner, shared.task, shared.electrophys):
+    for d in (common.scanner, common.task, common.amplifier):
         meg.update(d)
 
-    channels = OrderedDict()
-    channels['name'] = []
-    channels['type'] = []
-    channels['description'] = []
-    channels['sampling_frequency'] = []
-    channels['low_cutoff'] = []
-    channels['high_cutoff'] = []
-    channels['notch'] = []
-    channels['software_filters'] = []
-    channels['status'] = []
+    channels = common.channels
 
-    events = OrderedDict()
-    events['onset'] = []
-    events['duration'] = []
-    events['trial_type'] = []
-    events['response_time'] = []
-    events['stim_file'] = []
-    events['HED'] = []
+    events = common.events
 
 ####################################################################################
 class eeg:
@@ -222,17 +249,9 @@ class eeg:
     # _electrodes.tsv
     # _scans.tsv
 
-    electrodes = OrderedDict()
-    electrodes['name'] = []
-    electrodes['x'] = []
-    electrodes['y'] = []
-    electrodes['z'] = []
-    electrodes['type'] = []
-    electrodes['material'] = []
+    scans = common.scans
 
-    scans = OrderedDict()
-    scans['filename'] = []
-    scans['acq_time'] = []
+    electrodes = common.electrodes
 
     # RUN specific files
     # _eeg.json
@@ -240,28 +259,12 @@ class eeg:
     # _events.tsv
 
     eeg = {}
-    for d in (shared.scanner, shared.task, shared.electrophys):
+    for d in (common.scanner, common.task, common.amplifier):
         eeg.update(d)
 
-    channels = OrderedDict()
-    channels['name'] = []
-    channels['type'] = []
-    channels['description'] = []
-    channels['sampling_frequency'] = []
-    channels['low_cutoff'] = []
-    channels['high_cutoff'] = []
-    channels['notch'] = []
-    channels['software_filters'] = []
-    channels['status'] = []
+    channels = common.channels
 
-    events = OrderedDict()
-    events['onset'] = []
-    events['duration'] = []
-    events['trial_type'] = []
-    events['response_time'] = []
-    events['stim_file'] = []
-    events['HED'] = []
-
+    events = common.events
 
 ####################################################################################
 class ieeg:
@@ -272,17 +275,10 @@ class ieeg:
     # _electrodesinfo.txt
     # _scans.tsv
 
-    electrodes = OrderedDict()
-    electrodes['name'] = []
-    electrodes['x'] = []
-    electrodes['y'] = []
-    electrodes['z'] = []
-    electrodes['type'] = []
-    electrodes['material'] = []
+    scans = common.scans
 
-    scans = OrderedDict()
-    scans['filename'] = []
-    scans['acq_time'] = []
+    electrodes = common.electrodes
+    electrodes['size'] = []
 
     # RUN specific files
     # _ieeg.json
@@ -290,24 +286,10 @@ class ieeg:
     # _events.tsv
 
     ieeg = {}
-    for d in (shared.scanner, shared.task, shared.electrophys):
+    for d in (common.scanner, common.task, common.amplifier):
         ieeg.update(d)
 
-    channels = OrderedDict()
-    channels['name'] = []
-    channels['type'] = []
-    channels['description'] = []
-    channels['sampling_frequency'] = []
-    channels['low_cutoff'] = []
-    channels['high_cutoff'] = []
-    channels['notch'] = []
-    channels['software_filters'] = []
-    channels['status'] = []
+    channels = common.channels
+    channels['group'] = []
 
-    events = OrderedDict()
-    events['onset'] = []
-    events['duration'] = []
-    events['trial_type'] = []
-    events['response_time'] = []
-    events['stim_file'] = []
-    events['HED'] = []
+    events = common.events

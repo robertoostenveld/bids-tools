@@ -50,7 +50,7 @@ def help(name):
     print 'and creates the required/optional sidecar files.'
     print ''
     print 'Use as'
-    print '  %s [options] [inputdir]' % name
+    print '  %s [options] <inputdir>' % name
     print ''
     print 'Supported options include the following'
     print '  -t,--test          do not create the files, just print which files would be created'

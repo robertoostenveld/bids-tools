@@ -169,7 +169,7 @@ def createSidecarMEG(root, sub, ses):
     filename = os.path.join(dirname, basename + '_scans.tsv')
     writeTSV(filename, sidecar.meg.scans)
 
-    for run in listMEGruns(os.path.join(dirname)):
+    for run in listScans(os.path.join(dirname), 'meg'):
         (run, ext) = os.path.splitext(run)
         filename = os.path.join(dirname, run + '_meg.json')
         writeJSON(filename, sidecar.meg.meg)
@@ -220,12 +220,16 @@ def createSidecarParticipants(root):
     writeTSV(filename, participants)
 
 ################################################################################################
-def listMEGruns(root):
+def listScans(root, typ):
     runs = []
     for file in os.listdir(root):
-        if re.match('^.*\.ds$', file):
+        if typ=='meg' and re.match('^.*\.ds$', file):
             runs.append(file)
-        if re.match('^.*\.fif$', file):
+        if typ=='meg' and re.match('^.*\.fif$', file):
+            runs.append(file)
+        if typ=='anat' and re.match('^.*\.nii$', file):
+            runs.append(file)
+        if typ=='func' and re.match('^.*\.nii$', file):
             runs.append(file)
     return runs
 
@@ -245,12 +249,13 @@ for sub in os.listdir(root):
         hasSub = True
         subList.append(sub)
         for ses in os.listdir(os.path.join(root, sub)):
+            print "ses", ses
             if not os.path.isdir(os.path.join(root, sub, ses)):
                 continue
             # sub-001/ses-mri01
             if re.match('^ses-[a-zA-Z0-9]*$', ses):
                 hasSes = True
-                for typ in os.listdir(os.path.join(root, sub)):
+                for typ in os.listdir(os.path.join(root, sub, ses)):
                     if not os.path.isdir(os.path.join(root, sub, ses, typ)):
                         continue
                     # sub-001/ses-mri01/anat
@@ -272,7 +277,7 @@ for sub in os.listdir(root):
                             createSidecarIEEG(root, sub, ses)
                 if not hasTyp:
                     raise NameError('ERROR: type is missing')
-                    # if len(listMEGruns(os.path.join(root, sub, ses)))>0:
+                    # if len(listScans(os.path.join(root, sub, ses)), 'meg')>0:
                     #    createSidecarMEG(root, sub, ses)
 
         for typ in os.listdir(os.path.join(root, sub)):
@@ -298,7 +303,7 @@ for sub in os.listdir(root):
                     createSidecarIEEG(root, sub, ses)
         if not hasTyp:
             raise NameError('ERROR: type is missing')
-            # if len(listMEGruns(os.path.join(root, sub)))>0:
+            # if len(listScans(os.path.join(root, sub)), 'meg')>0:
             #    createSidecarMEG(root, sub)
 
     if hasSes:

@@ -128,7 +128,7 @@ print "###### the script should not need any changes below this line ######"
 print ""    
 print "# create the target directory structure"
 for subv,sesv in zip(subvar,sesvar):
-    print "mkdir -p %s" % os.path.join("$OUTPUTDIR", "$"+subv, "$"+sesv)
+    print "mkdir -p %s" % os.path.join("$OUTPUTDIR", "$"+subv, "$"+sesv, "meg")
 
 print ""    
 print "# copy all the files"
@@ -136,6 +136,6 @@ print "# copy all the files"
 for root,file,identifier in zip(rootlist, filelist, identifierlist):
     index_id = uniqueidentifier.index(identifier)
     fullfile1 = os.path.join(root, file)
-    fullfile2 = os.path.join("$OUTPUTDIR", '$'+subvar[index_id], '$'+sesvar[index_id], file)
+    fullfile2 = os.path.join("$OUTPUTDIR", '$'+subvar[index_id], '$'+sesvar[index_id], "meg", file)
     print "$COMMAND \"%s\" \"%s\"" % (fullfile1, fullfile2)
 

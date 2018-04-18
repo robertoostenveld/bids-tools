@@ -9,6 +9,10 @@ echo files in a raw data directory to BIDS. The raw directory should contain
 echo the DICOM and the CTF data files in a BIDS-like organization, like we
 echo have them at the Donders.
 echo
+echo Prior to using this tool, you can use the reorganize_dicom_dataset and 
+echo the reorganize_ctf_dataset tools to reorganize existing data into a 
+echo BIDS-like structure.
+echo
 echo Use as
 echo $0 '-s <SOURCEDIR> -t <TARGETDIR>'
 echo

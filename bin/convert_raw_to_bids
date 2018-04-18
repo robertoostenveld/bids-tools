@@ -1,0 +1,148 @@
+#!/bin/bash
+#
+# Copyright (C) 2018, Robert Oostenveld
+
+displayhelp() { 
+echo 
+echo This utility prints out the commands needed to convert and rename the
+echo files in a raw data directory to BIDS. The raw directory should contain
+echo the DICOM and the CTF data files in a BIDS-like organization, like we
+echo have them at the Donders.
+echo
+echo Use as
+echo $0 '-s <SOURCEDIR> -t <TARGETDIR>'
+echo
+}
+
+echoerr() {
+echo "$@" 1>&2;
+}
+
+##############################################################################
+# parse command line arguments
+##############################################################################
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -h|--help)
+    displayhelp
+    exit 0
+    ;;
+    -s|--source)
+    SOURCE=$(realpath "$2")
+    shift # past argument
+    shift # past value
+    ;;
+    -t|--target)
+    TARGET=$(realpath "$2")
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+##############################################################################
+# test the options
+##############################################################################
+
+if [ -z ${SOURCE} ]; then
+echoerr ERROR: source directory must be specified
+exit 1
+fi
+
+if [ -z ${TARGET} ]; then
+echoerr ERROR: target directory must be specified
+exit 1
+fi
+
+if [ ! -d ${SOURCE} ]; then
+echoerr ERROR: source directory does not exist
+exit 1
+fi
+
+if [ -d ${TARGET} ]; then
+echoerr WARNING: existing files in target directory will be overwritten
+fi
+
+##############################################################################
+# parse the data and create a script to convert it
+##############################################################################
+
+for SUB in $SOURCE/sub-* ; do 
+# remove the base part of the directory
+SUB=`basename ${SUB}`
+for SES in $SOURCE/${SUB}/ses-* ; do 
+# remove the base part of the directory
+SES=`basename ${SES}`
+for TYP in $SOURCE/${SUB}/${SES}/* ; do 
+# remove the base part of the directory
+TYP=`basename ${TYP}`
+
+case ${TYP} in 
+  *t1*)
+    # these should start with _ when non-empty
+    ACQ=
+    CE=
+    REC=
+    RUN=
+    MODALITY=_T1w
+
+    OLDDIR=${SOURCE}/${SUB}/${SES}/${TYP}
+    NEWDIR=${TARGET}/${SUB}/${SES}/anat
+    NEWNAME=${SUB}_${SES}${ACQ}${RUN}${MODALITY}
+
+    echo mkdir -p ${TARGET}/${SUB}/${SES}/anat
+    echo dcm2niix -o ${NEWDIR} -f ${NEWNAME} ${OLDDIR}
+    ;;
+
+  meg)
+    # these should start with _ when non-empty
+    TASK=_task-unknown
+    ACQ=
+    PROC=
+    MODALITY=_meg
+
+    # count the number of dataset directories
+    NUM=`ls -d ${SOURCE}/${SUB}/${SES}/${TYP}/*.ds | wc -l`
+
+    echo mkdir -p ${TARGET}/${SUB}/${SES}/meg
+
+    i=1
+    for OLDNAME in ${SOURCE}/${SUB}/${SES}/${TYP}/*.ds ; do 
+      if [ $NUM -gt 1 ]; then 
+        RUN=_run-$i
+        i=$(expr $i + 1)
+      else
+        RUN=
+      fi
+      NEWNAME=${TARGET}/${SUB}/${SES}/${TYP}/${SUB}_${SES}${TASK}${ACQ}${PROC}${RUN}${MODALITY}.ds
+      echo newDs -anon ${OLDNAME} ${NEWNAME}
+    done
+    ;;
+
+  eeg) 
+    # echo EEG data found in $SOURCE/${SUB}/${SES}/${TYP}
+    ;;
+  ieeg) 
+    # echo iEEG data found in $SOURCE/${SUB}/${SES}/${TYP}
+    ;;
+  behav)
+    # echo behavioural data found in $SOURCE/${SUB}/${SES}/${TYP}
+    ;;
+  *) 
+    # echo unknown data found in $SOURCE/${SUB}/${SES}/${TYP}
+    ;;
+esac
+
+done # TYP
+done # SUB
+done # SES

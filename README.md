@@ -5,9 +5,10 @@ This repository contains a number of tools to support the [BIDS](http://bids.neu
 The documentation is split over multiple topics:
 
   * [Workflow](doc/workflow.md) - general description of the workflow to construct a BIDS dataset
-  * [Create sidecar files](doc/create_sidecar_files.md)
   * [Reorganize existing DICOM datasets](doc/reorganize_dicom_dataset.md)
   * [Reorganize existing CTF datasets](doc/reorganize_ctf_dataset.md)
+  * [Convert raw data to BIDS](doc/convert_raw_to_bids)
+  * [Create sidecar files](doc/create_sidecar_files.md)
   * [Donders](doc/donders.md) - specific documentation that applies to our center
 
 The specific details of the BIDS standard can be found elsewhere:

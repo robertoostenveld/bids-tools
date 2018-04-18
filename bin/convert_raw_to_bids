@@ -44,7 +44,6 @@ POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
 key="$1"
-
 case $key in
     -h|--help)
     displayhelp
@@ -118,7 +117,7 @@ case ${TYP} in
     NEWDIR=${TARGET}/${SUB}/${SES}/anat
     NEWNAME=${SUB}_${SES}${ACQ}${RUN}${MODALITY}
 
-    echo mkdir -p ${TARGET}/${SUB}/${SES}/anat
+    echo mkdir -p ${NEWDIR}
     echo dcm2niix -o ${NEWDIR} -f ${NEWNAME} ${OLDDIR}
     ;;
 
@@ -150,12 +149,15 @@ case ${TYP} in
   eeg) 
     # echo EEG data found in $SOURCE/${SUB}/${SES}/${TYP}
     ;;
+    
   ieeg) 
     # echo iEEG data found in $SOURCE/${SUB}/${SES}/${TYP}
     ;;
+    
   behav)
     # echo behavioural data found in $SOURCE/${SUB}/${SES}/${TYP}
     ;;
+    
   *) 
     # echo unknown data found in $SOURCE/${SUB}/${SES}/${TYP}
     ;;

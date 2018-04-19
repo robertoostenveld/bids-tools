@@ -22,6 +22,7 @@ import os
 import sys
 import re
 import getopt
+import pydicom as dicom
 
 if hasattr(sys, 'frozen'):
     basis = sys.executable
@@ -33,7 +34,6 @@ installed_folder = os.path.split(basis)[0]
 
 # bin contains this file, lib contains shared modules
 sys.path.insert(0,os.path.join(installed_folder,'../lib'))
-import pydicom as dicom
 
 def help(name):
     print ""
@@ -89,13 +89,16 @@ for dir in inputdirs:
 print '# found %d dicom files in %d directories' % (len(filelist), len(set(rootlist)))
 
 patientlist = []
-protocollist = []
+seriesdescriptionlist = []
 seriesnumberlist = []
 print('# getting dicom headers, this may take a while...')
 for root, file in zip(rootlist, filelist):
     ds = dicom.read_file(os.path.join(root, file))
     patientlist.append(ds.PatientName)
-    protocollist.append(ds.ProtocolName)
+    if 'SeriesDescription' in ds:
+        seriesdescriptionlist.append(ds.SeriesDescription)
+    else:
+        seriesdescriptionlist.append(ds.ProtocolName)
     seriesnumberlist.append(ds.SeriesNumber)
 
 identifierlist = []
@@ -105,11 +108,11 @@ for root, file, patient in zip(rootlist, filelist, patientlist):
     identifierlist.append(identifier)
 
 uniquepatient = sorted(list(set(patientlist)))
-uniqueprotocol = sorted(list(set(map(lambda n,s: '%03d-%s' % (n, s), seriesnumberlist, protocollist))))
+uniqueseriesdescription = sorted(list(set(map(lambda n,s: '%03d-%s' % (n, s), seriesnumberlist, seriesdescriptionlist))))
 uniqueidentifier = sorted(list(set(identifierlist)))
 
 print '# found %d patient IDs' % len(uniquepatient)
-print '# found %d protocols' % len(uniqueprotocol)
+print '# found %d series' % len(uniqueseriesdescription)
 print '# constructed %d different identifiers from patient IDs and directories' % len(uniqueidentifier)
 
 sub=1 # this is incremented
@@ -128,8 +131,8 @@ for identifier in uniqueidentifier:
 index=1
 protdir = []
 protvar = []
-for protocol in uniqueprotocol:
-    protdir.append(protocol) # fixme, check that the name is valid for a directory
+for seriesdescription in uniqueseriesdescription:
+    protdir.append(seriesdescription) # fixme, check that the name is valid for a directory
     protvar.append("PROT%03d" % index)
     index+=1
     
@@ -149,7 +152,7 @@ for subv,subd,sesv,sesd,identifier in zip(subvar,subdir,sesvar,sesdir,uniqueiden
     print "%s=%s ; %s=%s  # %s" % (subv,subd,sesv,sesd,identifier)
 
 print""
-print "# please verify the following protocol variables"
+print "# please verify the following seriesdescription variables"
 for protv,protd in zip(protvar,protdir):
     print "%s=%s" % (protv,protd)
 
@@ -166,11 +169,11 @@ print ""
 print "# copy all the files"
 
 previous=None
-for root,file,identifier,protocol,seriesnumber in zip(rootlist, filelist, identifierlist, protocollist, seriesnumberlist):
+for root,file,identifier,seriesdescription,seriesnumber in zip(rootlist, filelist, identifierlist, seriesdescriptionlist, seriesnumberlist):
     index_id = uniqueidentifier.index(identifier)
-    index_pr = uniqueprotocol.index('%03d-%s' % (seriesnumber, protocol))
+    index_pr = uniqueseriesdescription.index('%03d-%s' % (seriesnumber, seriesdescription))
     if previous!=(index_id,index_pr):
-        # place a blank line between blocks of dicom files with the same identifier and protocol
+        # place a blank line between blocks of dicom files with the same identifier and seriesdescription
         # this facilitates visual parsing of the bash script
         if previous!=None:
             # no empty line at the start
@@ -183,4 +186,3 @@ for root,file,identifier,protocol,seriesnumber in zip(rootlist, filelist, identi
 print ""    
 print "# remove empty directories"
 print "find $OUTPUTDIR -type d -empty -delete"
-

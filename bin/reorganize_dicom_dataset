@@ -36,19 +36,19 @@ installed_folder = os.path.split(basis)[0]
 sys.path.insert(0,os.path.join(installed_folder,'../lib'))
 
 def help(name):
-    print ""
-    print "This script searches through a directory for DICOM files and writes"
-    print "them to the output screen in such a way that you can easily make a script"
-    print "to reorganize them to a BIDS structure."
-    print ""
-    print "You should save the output to a script, edit the script and then execute it."
-    print ""
-    print "Use as"
-    print '  %s -c <command> -o <outputdir> [inputdir]' % name
-    print ""
-    print "Optional arguments"
-    print "   -c <command>   command to execute, eg. mv or cp"
-    print "   -x             do not check file extensions"
+    print("")
+    print("This script searches through a directory for DICOM files and writes")
+    print("them to the output screen in such a way that you can easily make a script")
+    print("to reorganize them to a BIDS structure.")
+    print("")
+    print("You should save the output to a script, edit the script and then execute it.")
+    print("")
+    print("Use as")
+    print('  %s -c <command> -o <outputdir> [inputdir]' % name)
+    print("")
+    print("Optional arguments")
+    print("   -c <command>   command to execute, eg. mv or cp")
+    print("   -x             do not check file extensions")
     
 # set the defaults
 command = "cp"
@@ -79,14 +79,14 @@ if len(inputdirs)<1:
 rootlist = []
 filelist = []
 for dir in inputdirs:
-    print '# scanning directory structure starting at %s' % dir
+    print('# scanning directory structure starting at %s' % dir)
     for root, dirs, files in os.walk(dir):
         for file in files:
             if (checkextension and re.match('.*IMA$', file) or re.match('.*\.ima$', file) or re.match('.*\.DCM$', file) or re.match('.*\.dcm$', file)) or not checkextension:
                 rootlist.append(root)
                 filelist.append(file)
 
-print '# found %d dicom files in %d directories' % (len(filelist), len(set(rootlist)))
+print('# found %d dicom files in %d directories' % (len(filelist), len(set(rootlist))))
 
 patientlist = []
 seriesdescriptionlist = []
@@ -111,9 +111,9 @@ uniquepatient = sorted(list(set(patientlist)))
 uniqueseriesdescription = sorted(list(set(map(lambda n,s: '%03d-%s' % (n, s), seriesnumberlist, seriesdescriptionlist))))
 uniqueidentifier = sorted(list(set(identifierlist)))
 
-print '# found %d patient IDs' % len(uniquepatient)
-print '# found %d series' % len(uniqueseriesdescription)
-print '# constructed %d different identifiers from patient IDs and directories' % len(uniqueidentifier)
+print('# found %d patient IDs' % len(uniquepatient))
+print('# found %d series' % len(uniqueseriesdescription))
+print('# constructed %d different identifiers from patient IDs and directories' % len(uniqueidentifier))
 
 sub=1 # this is incremented
 ses=1 # this remains the same
@@ -136,37 +136,37 @@ for seriesdescription in uniqueseriesdescription:
     protvar.append("PROT%03d" % index)
     index+=1
     
-print""
-print "# please verify the following general variables"
-print "OUTPUTDIR=%s" % outputdir
-print "COMMAND=%s" % command
+print("")
+print("# please verify the following general variables")
+print("OUTPUTDIR=%s" % outputdir)
+print("COMMAND=%s" % command)
 
 # give some examples
-print ""
-print "#COMMAND=cp"
-print "#COMMAND=mv"
+print("")
+print("#COMMAND=cp")
+print("#COMMAND=mv")
 
-print""
-print "# please verify the following subject and session identifier variables"
+print("")
+print("# please verify the following subject and session identifier variables")
 for subv,subd,sesv,sesd,identifier in zip(subvar,subdir,sesvar,sesdir,uniqueidentifier):
-    print "%s=%s ; %s=%s  # %s" % (subv,subd,sesv,sesd,identifier)
+    print("%s=%s ; %s=%s  # %s" % (subv,subd,sesv,sesd,identifier))
 
-print""
-print "# please verify the following seriesdescription variables"
+print("")
+print("# please verify the following seriesdescription variables")
 for protv,protd in zip(protvar,protdir):
-    print "%s=%s" % (protv,protd)
+    print("%s=%s" % (protv,protd))
 
-print ""    
-print "###### the script should not need any changes below this line ######"
+print("")
+print("###### the script should not need any changes below this line ######")
 
-print ""    
-print "# create the target directory structure"
+print("")
+print("# create the target directory structure")
 for subv,sesv in zip(subvar,sesvar):
     for protv in protvar:
-        print "mkdir -p %s" % os.path.join("$OUTPUTDIR", "$"+subv, "$"+sesv, "$"+protv)
+        print("mkdir -p %s" % os.path.join("$OUTPUTDIR", "$"+subv, "$"+sesv, "$"+protv))
 
-print ""    
-print "# copy all the files"
+print("")
+print("# copy all the files")
 
 previous=None
 for root,file,identifier,seriesdescription,seriesnumber in zip(rootlist, filelist, identifierlist, seriesdescriptionlist, seriesnumberlist):
@@ -177,12 +177,12 @@ for root,file,identifier,seriesdescription,seriesnumber in zip(rootlist, filelis
         # this facilitates visual parsing of the bash script
         if previous!=None:
             # no empty line at the start
-            print ''
+            print("")
         previous=(index_id,index_pr)
     fullfile1 = os.path.join(root, file)
     fullfile2 = os.path.join("$OUTPUTDIR", '$'+subvar[index_id], '$'+sesvar[index_id], '$'+protvar[index_pr], file)
-    print "$COMMAND \"%s\" \"%s\"" % (fullfile1, fullfile2)
+    print("$COMMAND \"%s\" \"%s\"" % (fullfile1, fullfile2))
     
-print ""    
-print "# remove empty directories"
-print "find $OUTPUTDIR -type d -empty -delete"
+print("")
+print("# remove empty directories")
+print("find $OUTPUTDIR -type d -empty -delete")

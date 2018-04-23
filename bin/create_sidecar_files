@@ -50,19 +50,39 @@ def help(name):
     print 'and creates the required/optional sidecar files.'
     print ''
     print 'Use as'
-    print '  %s [options] <inputdir>' % name
+    print '  %s [options] <datadir>' % name
     print ''
     print 'Supported options include the following'
     print '  -t,--test          do not create the files, just print which files would be created'
     print '  -f,--force         overwrite existing files, the default is not to overwrite'
     print ''
+    print 'The default is to create all sidecar files that apply to the dataset. If'
+    print 'you specify any of the following options, only these specific sidecar'
+    print 'files will be created and all others will be skipped.'
+    print ''
+    print '  --participants     create the participants.tsv file'
+    print '  --sessions         create the sessions.tsv files (per subject)'
+    print '  --anat             create the sidecar files for the specific datatype (per subject and session)'
+    print '  --meg              create the sidecar files for the specific datatype (per subject and session)'
+    print '  --eeg              create the sidecar files for the specific datatype (per subject and session)'
+    print '  --ieeg             create the sidecar files for the specific datatype (per subject and session)'
+    print '  --beh              create the sidecar files for the specific datatype (per subject and session)'
+    print ''
 
 # set the defaults
 test = False
 force = False
+create_all = True
+create_participants = False
+create_sessions = False
+create_anat = False
+create_beh = False
+create_eeg = False
+create_ieeg = False
+create_meg = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:],'htf',['test','force'])
+    opts, args = getopt.getopt(sys.argv[1:],'htf',['test','force','participants','sessions','anat','beh','eeg','ieeg','meg'])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -74,6 +94,28 @@ for opt, arg in opts:
         test = True
     elif opt in ('-f', '--force'):
         force = True
+    elif opt in ('--participants'):
+        create_participants = True
+        create_all = False
+    elif opt in ('--sessions'):
+        create_sessions = True
+        create_all = False
+    elif opt in ('--anat'):
+        create_anat = True
+        create_all = False
+    elif opt in ('--beh'):
+        create_beh = True
+        create_all = False
+    elif opt in ('--eeg'):
+        create_eeg = True
+        create_all = False
+    elif opt in ('--ieeg'):
+        create_ieeg = True
+        create_all = False
+    elif opt in ('--meg'):
+        create_meg = True
+        create_all = False
+
 
 inputdirs = args
 if len(inputdirs)!=1:
@@ -139,21 +181,27 @@ def writeTSV(filename, data):
 ####################################################################################
 
 def createSidecarANAT(root, sub, ses):
+  if create_all or create_anat:
     print 'createSidecarANAT', root, sub, ses
 
 def createSidecarDWI(root, sub, ses):
+  if create_all:
     print 'createSidecarDWI', root, sub, ses
 
 def createSidecarFUNC(root, sub, ses):
+  if create_all:
     print 'createSidecarFUNC', root, sub, ses
 
 def createSidecarFMAP(root, sub, ses):
+  if create_all:
     print 'createSidecarFMAP', root, sub, ses
 
 def createSidecarBEH(root, sub, ses):
+  if create_all or create_beh:
     print 'createSidecarBEH', root, sub, ses
 
 def createSidecarMEG(root, sub, ses):
+  if create_all or create_meg:
     typ = 'meg'
     if ses==None:
         dirname = os.path.join(root, sub, typ)
@@ -179,37 +227,45 @@ def createSidecarMEG(root, sub, ses):
         writeTSV(filename, sidecar.meg.events)
 
 def createSidecarEEG(root, sub, ses):
+  if create_all or create_eeg:
     print 'createSidecarEEG', root, sub, ses
 
 def createSidecarIEEG(root, sub, ses):
+  if create_all or create_ieeg:
     print 'createSidecarIEEG', root, sub, ses
 
 def createSidecarSessions(root, sub):
+  if create_all or create_sessions:
     filename = os.path.join(root, sub, 'sessions.tsv')
     session = [];
     for ses in os.listdir(os.path.join(root, sub)):
         if re.match('^ses-[a-zA-Z0-9]*$', ses):
             session.append(ses)
-    data = {'session': session}
+    data = {'session_id': session}
     writeTSV(filename, data)
 
 def createSidecarREADME(root):
+  if create_all:
     filename = os.path.join(root, 'README')
     writeASCII(filename, sidecar.readme)
 
 def createSidecarCHANGES(root):
+  if create_all:
     filename = os.path.join(root, 'CHANGES')
     writeASCII(filename, sidecar.changes)
 
 def createSidecarTask(root, task):
+  if create_all:
     filename = os.path.join(root, 'task-' + task + '.json')
     writeJSON(filename, sidecar.task)
 
 def createSidecarDatasetDescription(root):
+  if create_all:
     filename = os.path.join(root, 'dataset_description.json')
     writeJSON(filename, sidecar.dataset_description)
 
 def createSidecarParticipants(root):
+  if create_all or create_participants:
     filename = os.path.join(root, 'participants.tsv')
     participants = sidecar.participants
     for sub in os.listdir(root):
@@ -249,7 +305,6 @@ for sub in os.listdir(root):
         hasSub = True
         subList.append(sub)
         for ses in os.listdir(os.path.join(root, sub)):
-            print "ses", ses
             if not os.path.isdir(os.path.join(root, sub, ses)):
                 continue
             # sub-001/ses-mri01

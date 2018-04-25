@@ -1,4 +1,4 @@
-## bin/reorganize_ctf_dataset
+## reorganize_ctf_dataset
 
 This is a BIDS conversion utility to reorganize existing CTF MEG datasets. It works on a collection of MEG datasets contained in a single directory or spread over multiple directories. It copies or moves the files according to the standard BIDS structure that we started using from 2017 onwards at the DCCN.
 

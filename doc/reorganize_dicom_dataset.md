@@ -1,4 +1,4 @@
-## bin/reorganize_dicom_dataset
+## reorganize_dicom_dataset
 
 *You should also check out [heudiconv](https://github.com/nipy/heudiconv), which is a similar tool with more features, but also more complexity.*
 

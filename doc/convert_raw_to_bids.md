@@ -1,4 +1,4 @@
-## bin/convert_raw_to_bids
+## convert_raw_to_bids
 
 This utility prints out the commands needed to convert and rename the
 files in a raw data directory to BIDS. The raw directory should contain

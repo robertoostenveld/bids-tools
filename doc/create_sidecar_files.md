@@ -1,4 +1,4 @@
-## bin/create_sidecar_files
+## create_sidecar_files
 
 This is a utility which assumes that you have an existing organization of the data over the required BIDS directory structure. This utility will traverse through all subjects, sessions and data type directories and will create the required sidecar JSON, TSV and text files. 
 

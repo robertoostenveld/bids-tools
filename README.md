@@ -1,8 +1,6 @@
 # BIDS tools
 
-This repository contains a number of tools to support the [BIDS](http://bids.neuroimaging.io/) data structure.
-
-The documentation is split over multiple topics:
+This repository contains a number of tools to support the [BIDS](http://bids.neuroimaging.io/) data structure. The documentation is split over multiple topics:
   * [Workflow](doc/workflow.md) - general outline of the workflow to construct a BIDS dataset
   * [Donders](doc/donders.md) - specific documentation that applies to our center
 

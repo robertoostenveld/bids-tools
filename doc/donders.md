@@ -10,7 +10,7 @@ The number (3010029.01 in this example) is the project identifier that we also u
 
 The raw directory contains the raw data from the MRI, MEG and EEG labs without any conversions on file names and/or file formats. In the BIDS documentation this is referred to as the "source" directory. For the MRI scans it consists primarily of DICOM files.
 
-At the DCCN the data from the MEG and MRI labs is automatically moved into the raw directories. You should manually copy the presentation log files and lab notes to this directory, to complement the scanner files.
+At the DCCN the data from the MEG and MRI labs is automatically transferred into the raw directories. You should manually copy the presentation log files and lab notes to this directory, to complement the scanner files.
 
 The derived directory contains the result from processing and will mainly contain MATLAB \*.mat files for MEG and NIfTI \*.nii files for fMRI. You may have multiple derived directories, e.g. one with the results of preprocessing and defacing (still in BIDS format), and another one with  the results of single subject and group statistics.
 

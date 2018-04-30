@@ -283,9 +283,9 @@ def listScans(root, typ):
             runs.append(file)
         if typ=='meg' and re.match('^.*\.fif$', file):
             runs.append(file)
-        if typ=='anat' and re.match('^.*\.nii$', file):
+        if typ=='anat' and (re.match('^.*\.nii$', file) or re.match('^.*\.nii.gz$', file)):
             runs.append(file)
-        if typ=='func' and re.match('^.*\.nii$', file):
+        if typ=='func' and (re.match('^.*\.nii$', file) or re.match('^.*\.nii.gz$', file)):
             runs.append(file)
     return runs
 

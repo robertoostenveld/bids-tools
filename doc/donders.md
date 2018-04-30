@@ -23,5 +23,5 @@ The raw directory should be organized consistently with the organization in the 
 
 After completion of the project the derived data and the scripts directory should be archived to the **research documentation collection** on the [Donders Research Data Repository](http://data.donders.ru.nl).
 
-If you keep a well-organized representation of your data (preprocessed and defaced data in "converted", statistical results in "derived"), you can upload these together with the "scripts" to the corresponding **data sharing collection** on the [Donders Research Data Repository](http://data.donders.ru.nl).
+If you keep a well-organized representation of your data (minimally preprocessed and defaced data in "converted", statistical results in "derived"), you can upload these together with the "scripts" to the corresponding **data sharing collection** on the [Donders Research Data Repository](http://data.donders.ru.nl).
 

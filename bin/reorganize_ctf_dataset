@@ -108,11 +108,11 @@ print("# please verify the following general variables")
 print("COMMAND=%s" % command)
 print("OUTPUTDIR=%s" % outputdir)
 
-# give some examples
+# give some examples, note that quotation marks are needed in case there are spaces in the command
 print("")
-print("#COMMAND=newDs -anon")
-print("#COMMAND=moveDs")
-print("#COMMAND=copyDs")
+print("#COMMAND=\"newDs -anon\"")
+print("#COMMAND=\"moveDs\"")
+print("#COMMAND=\"copyDs\"")
 print("")
 print("# this is needed for newDs")
 print("module load 32bit/ctf/5.40")

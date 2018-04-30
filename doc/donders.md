@@ -7,7 +7,7 @@ At the Donders Centre for Cognitive Neuroimaging (DCCN) of the [Donders Institut
   - /project/3010029.01/derived
   - /project/3010029.01/scripts
 
-The number (3010029.01 in this example) is the DCCN-specific project identifier which we also use for lab bookings and for financial accounting.
+The number (3010029.01 in this example) is the DCCN-specific project identifier which is registered in the [project database](https://intranet.donders.ru.nl/projects) and that we also use for lab bookings and for financial accounting.
 
 The "raw" directory contains the raw data from the MRI, MEG and EEG labs without any conversions on file names and/or file formats. In the BIDS documentation this is referred to as the "source" directory. For the MRI scans it consists primarily of DICOM files. At the DCCN the data from the MEG and MRI labs is automatically transferred into the raw directories. You should manually copy the presentation log files and lab notes to this directory, to complement the scanner files.
 

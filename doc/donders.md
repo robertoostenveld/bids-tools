@@ -7,15 +7,15 @@ At the Donders Centre for Cognitive Neuroimaging (DCCN) of the [Donders Institut
   - /project/3010029.01/derived
   - /project/3010029.01/scripts
 
-The number (3010029.01 in this example) is the project identifier that we also use for lab bookings and for financial accounting.
+The number (3010029.01 in this example) is the DCCN-specific project identifier which we also use for lab bookings and for financial accounting.
 
-The raw directory contains the raw data from the MRI, MEG and EEG labs without any conversions on file names and/or file formats. In the BIDS documentation this is referred to as the "source" directory. For the MRI scans it consists primarily of DICOM files. At the DCCN the data from the MEG and MRI labs is automatically transferred into the raw directories. You should manually copy the presentation log files and lab notes to this directory, to complement the scanner files.
+The "raw" directory contains the raw data from the MRI, MEG and EEG labs without any conversions on file names and/or file formats. In the BIDS documentation this is referred to as the "source" directory. For the MRI scans it consists primarily of DICOM files. At the DCCN the data from the MEG and MRI labs is automatically transferred into the raw directories. You should manually copy the presentation log files and lab notes to this directory, to complement the scanner files.
 
-The converted directory contains the minimally processed data after conversion to BIDS format. This means that DICOMs are converted to NIFTI, coregistered and defaced, MEG datasets are renamed to match the BIDS requirements, and sidecar files have been added. Preferably this is also the representation of the data that you would share in a **data sharing collection** on http://data.donders.ru.nl.
+The "converted" directory contains the minimally processed data after conversion to BIDS format. This means that DICOMs are converted to NIfTI, coregistered and defaced, MEG datasets are renamed to match the BIDS requirements, and sidecar files have been added. Preferably this is the representation on the basis of which you implement your subsequent analysis, but also the representation for sharing. 
 
-The derived directory contains the result from processing and analysis and will mainly contain MATLAB \*.mat files for MEG and NIfTI \*.nii files for fMRI. You may have multiple derived directories, e.g. one with the results of preprocessing and defacing (still in BIDS format), and another one with  the results of single subject and group statistics.
+The "derived" directory contains the result from processing and analysis and will mainly contain MATLAB \*.mat files for MEG and NIfTI \*.nii files for fMRI. If you are doing multiple analyses independent of each other, you may need multiple directories for the different derived datasets.
 
-The scripts directory corresponds to your own clone of this repository, plus additional scripts and functions that you use for your analysis.
+The "scripts" directory corresponds to your own clone of this repository, plus additional scripts and functions that you use for your analysis.
 
 ### Archiving the data at the Donders
 

@@ -1,6 +1,6 @@
 ## reorganize_dicom_dataset
 
-*You should also check out [heudiconv](https://github.com/nipy/heudiconv), which is a similar tool with more features, but also more complexity.*
+*You should also check out the DCCN-specific [dac2bids](https://github.com/dangom/dac2bids) utilities implemented by [Daniel Gomez](https://github.com/dangom) and [heudiconv](https://github.com/nipy/heudiconv), which is a similar tool with more features (and more complexity).*
 
 This is a BIDS conversion utility to reorganize existing MRI DICOM datasets. It works on a collection of DICOM files in a single directory or over multiple directories. It copies or moves the files according to the standard BIDS structure that we started using from 2017 onwards at the DCCN.
 

@@ -23,5 +23,5 @@ It is an executable Python script which you can run from the Linux command line.
      -x             do not check file extensions
 ```
 
-Following this tool, you would probably continue with converting the DICOM files in the "source" structure into NIfTI files. For that you can have a look at [convert_raw_to_bids](./convert_raw_to_bids.ms) or at [dac2bids](https://github.com/dangom/dac2bids).
+Following this tool, you would probably continue with converting the DICOM files in the "source" structure into NIfTI files. For that you can have a look at [convert_raw_to_bids](convert_raw_to_bids.md) or at [dac2bids](https://github.com/dangom/dac2bids).
 

@@ -1,6 +1,6 @@
 ## Recommended data organization structure for the Donders
 
-At the Donders Centre for Cognitive Neuroimaging (DCCN) of the [Donders Institute](http://www.ru.nl/donders) we use a Linux compute cluster with network attached central storage for most analyses. On this central storage you have a home directory and a project directory. In the project directory, we recommend the following organization
+At the Donders Centre for Cognitive Neuroimaging (DCCN) of the [Donders Institute](http://www.ru.nl/donders) we use a [Linux compute cluster](http://dccn-hpc-wiki.readthedocs.io/) with network attached storage for most analyses. All researchers have a home directory and a project directory on this network attached storage. In the project directory, we recommend the following organization:
 
   - /project/3010029.01/raw
   - /project/3010029.01/converted

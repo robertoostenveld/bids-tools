@@ -44,17 +44,26 @@ def help(name):
     print("You should save the output to a script, edit the script and then execute it.")
     print("")
     print("Use as")
-    print('  %s -c <command> -o <outputdir> -x <extension> [inputdir]' % name)
+    print('  %s -c <command> -o <outputdir> -x <extension> -s <sessionprefix> [inputdir]' % name)
     print("")
-
+    print("Optional arguments")
+    print("   -c <command>          command to execute, eg. mv or cp")
+    print("   -o <outputdir>        output directory")
+    print("   -x <extension>        file extension (default = \"log\")")
+    print("   -s <sessionprefix>    session prefix (default = \"behav\")")
+    print("")
+    print("It is possible that the behavioural data is recorded during an MRI session; in")
+    print("that case you should specify \"mri\" as session prefix. The default is \"behav\",")
+    print("resulting in a naming scheme such as sub-001/ses-behav01.")
 
 # set the defaults
 command = "cp"
 outputdir = "FIXME"
 extension = "log"
+sessionprefix = "behav"
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hc:o:x:", ["command=", "outputdir=", "extension="])
+    opts, args = getopt.getopt(sys.argv[1:], "hc:o:x:s:", ["command=", "outputdir=", "extension=", "sessionprefix="])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -68,6 +77,8 @@ for opt, arg in opts:
         outputdir = arg
     elif opt in ("-x", "--extension"):
         extension = arg
+    elif opt in ("-s", "--sessionprefix"):
+        sessionprefix = arg
 
 inputdirs = args
 if len(inputdirs) < 1:
@@ -104,7 +115,7 @@ sesvar = []
 for identifier in uniqueidentifier:
     subdir.append("sub-%03d" % sub)
     subvar.append("SUB%03d" % sub)
-    sesdir.append("ses-behav%02d" % ses)
+    sesdir.append("ses-%s%02d" % (sessionprefix, ses))
     sesvar.append("SES%02d" % sub)
     sub += 1
 
@@ -118,11 +129,23 @@ print("")
 print("#COMMAND=\"cp\"")
 print("#COMMAND=\"mv\"")
 print("#COMMAND=\"rsync -arpv\"")
+print("#COMMAND=\"ln\"")
 
 print("")
 print("# please verify the following subject and session identifier variables")
+
+width1 = 0
+width2 = 0
 for subv, subd, sesv, sesd, identifier in zip(subvar, subdir, sesvar, sesdir, uniqueidentifier):
-    print("%s=%s ; %s=%s  # %s" % (subv, subd, sesv, sesd, identifier))
+    col1 = "%s=%s"  % (subv, subd)
+    col2 = "%s=%s"  % (sesv, sesd)
+    width1 = max(width1, len(col1))
+    width2 = max(width2, len(col2))
+for subv, subd, sesv, sesd, identifier in zip(subvar, subdir, sesvar, sesdir, uniqueidentifier):
+    col1 = "%s=%s"  % (subv, subd)
+    col2 = "%s=%s"  % (sesv, sesd)
+    col3 = "%s"     % (identifier, )
+    print(col1.ljust(width1) + " ; " + col2.ljust(width2) + " # " + col3)
 
 print("")
 print("###### the script should not need any changes below this line ######")
@@ -142,7 +165,11 @@ for root, file, identifier in zip(rootlist, filelist, identifierlist):
     oldname.append(os.path.join(root, file))
     newname.append(os.path.join("$OUTPUTDIR", '$' + subvar[index_id], '$' + sesvar[index_id], "behav", file))
 
-padlength = max((len(x),x) for x in oldname)[0]
+if len(oldname):
+    width = max((len(x),x) for x in oldname)[0]
+else:
+    width = 0
+
 for old, new in zip(oldname, newname):
-    pad = (padlength - len(old)) * " "
+    pad = (width - len(old)) * " "
     print("$COMMAND \"%s\"%s \"%s\"" % (old, pad, new))

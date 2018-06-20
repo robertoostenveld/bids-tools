@@ -25,14 +25,15 @@ import getopt
 
 if hasattr(sys, 'frozen'):
     basis = sys.executable
-elif sys.argv[0]!='':
+elif sys.argv[0] != '':
     basis = sys.argv[0]
 else:
     basis = './'
 installed_folder = os.path.split(basis)[0]
 
 # bin contains this file, lib contains shared modules
-sys.path.insert(0,os.path.join(installed_folder,'../lib'))
+sys.path.insert(0, os.path.join(installed_folder, '../lib'))
+
 
 def help(name):
     print("")
@@ -45,13 +46,19 @@ def help(name):
     print("Use as")
     print('  %s -c <command> -o <outputdir> [inputdir]' % name)
     print("")
+    print("Optional arguments")
+    print("   -c <command>   command to execute, eg. mv or cp")
+    print("   -o <outputdir> output directory")
+    print("")
+
 
 # set the defaults
 command = "moveDs"
 outputdir = "FIXME"
+sessionprefix = "meg"
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:],"hc:o:",["command=","outputdir="])
+    opts, args = getopt.getopt(sys.argv[1:], "hc:o:", ["command=", "outputdir="])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -65,7 +72,7 @@ for opt, arg in opts:
         outputdir = arg
 
 inputdirs = args
-if len(inputdirs)<1:
+if len(inputdirs) < 1:
     help(sys.argv[0])
     sys.exit(2)
 
@@ -76,8 +83,8 @@ for dir in inputdirs:
     for root, dirs, files in os.walk(dir):
         for file in files:
             if re.match('^.*\.res4$', file) and not re.match('^hz.*\.res4$', file):
-                rootlist.append(os.path.split(root)[0]) # the directory containing the *.ds directory
-                filelist.append(os.path.split(root)[1]) # the *.ds directory itself
+                rootlist.append(os.path.split(root)[0])  # the directory containing the *.ds directory
+                filelist.append(os.path.split(root)[1])  # the *.ds directory itself
 
 print('# found %d CTF datasets in %d directories' % (len(filelist), len(set(rootlist))))
 
@@ -90,8 +97,8 @@ for root, file in zip(rootlist, filelist):
 uniqueidentifier = sorted(list(set(identifierlist)))
 print('# constructed %d different identifiers' % len(uniqueidentifier))
 
-sub=1
-ses=1
+sub = 1
+ses = 1
 subdir = []
 sesdir = []
 subvar = []
@@ -99,7 +106,7 @@ sesvar = []
 for identifier in uniqueidentifier:
     subdir.append("sub-%03d" % sub)
     subvar.append("SUB%03d" % sub)
-    sesdir.append("ses-meg%02d" % ses)
+    sesdir.append("ses-%s%02d" % (sessionprefix, ses))
     sesvar.append("SES%02d" % sub)
     sub += 1
 
@@ -113,28 +120,50 @@ print("")
 print("#COMMAND=\"newDs -anon\"")
 print("#COMMAND=\"moveDs\"")
 print("#COMMAND=\"copyDs\"")
+print("#COMMAND=\"ln -s\"")
 print("")
 print("# this is needed for newDs")
 print("module load 32bit/ctf/5.40")
 
 print("")
 print("# please verify the following subject and session identifier variables")
-for subv,subd,sesv,sesd,identifier in zip(subvar,subdir,sesvar,sesdir,uniqueidentifier):
-    print("%s=%s ; %s=%s  # %s" % (subv,subd,sesv,sesd,identifier))
+
+width1 = 0
+width2 = 0
+for subv, subd, sesv, sesd, identifier in zip(subvar, subdir, sesvar, sesdir, uniqueidentifier):
+    col1 = "%s=%s" % (subv, subd)
+    col2 = "%s=%s" % (sesv, sesd)
+    width1 = max(width1, len(col1))
+    width2 = max(width2, len(col2))
+for subv, subd, sesv, sesd, identifier in zip(subvar, subdir, sesvar, sesdir, uniqueidentifier):
+    col1 = "%s=%s" % (subv, subd)
+    col2 = "%s=%s" % (sesv, sesd)
+    col3 = "%s" % (identifier, )
+    print(col1.ljust(width1) + " ; " + col2.ljust(width2) + " # " + col3)
 
 print("")
 print("###### the script should not need any changes below this line ######")
 
 print("")
 print("# create the target directory structure")
-for subv,sesv in zip(subvar,sesvar):
-    print("mkdir -p %s" % os.path.join("$OUTPUTDIR", "$"+subv, "$"+sesv, "meg"))
+for subv, sesv in zip(subvar, sesvar):
+    print("mkdir -p %s" % os.path.join("$OUTPUTDIR", "$" + subv, "$" + sesv, "meg"))
 
 print("")
 print("# copy all the files")
 
-for root,file,identifier in zip(rootlist, filelist, identifierlist):
+oldname = []
+newname = []
+for root, file, identifier in zip(rootlist, filelist, identifierlist):
     index_id = uniqueidentifier.index(identifier)
-    fullfile1 = os.path.join(root, file)
-    fullfile2 = os.path.join("$OUTPUTDIR", '$'+subvar[index_id], '$'+sesvar[index_id], "meg", file)
-    print("$COMMAND \"%s\" \"%s\"" % (fullfile1, fullfile2))
+    oldname.append(os.path.join(root, file))
+    newname.append(os.path.join("$OUTPUTDIR", '$' + subvar[index_id], '$' + sesvar[index_id], "behav", file))
+
+if len(oldname):
+    width = max((len(x), x) for x in oldname)[0]
+else:
+    width = 0
+
+for old, new in zip(oldname, newname):
+    pad = (width - len(old)) * " "
+    print("$COMMAND \"%s\"%s \"%s\"" % (old, pad, new))

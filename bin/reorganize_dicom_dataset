@@ -2,7 +2,7 @@
 #
 # BIDS conversion utility for collections of DICOM files
 #
-# Copyright (C) 2017, Robert Oostenveld
+# Copyright (C) 2017-2018, Robert Oostenveld
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,14 +26,15 @@ import pydicom as dicom
 
 if hasattr(sys, 'frozen'):
     basis = sys.executable
-elif sys.argv[0]!='':
+elif sys.argv[0] != '':
     basis = sys.argv[0]
 else:
     basis = './'
 installed_folder = os.path.split(basis)[0]
 
 # bin contains this file, lib contains shared modules
-sys.path.insert(0,os.path.join(installed_folder,'../lib'))
+sys.path.insert(0, os.path.join(installed_folder, '../lib'))
+
 
 def help(name):
     print("")
@@ -48,15 +49,18 @@ def help(name):
     print("")
     print("Optional arguments")
     print("   -c <command>   command to execute, eg. mv or cp")
+    print("   -o <outputdir> output directory")
     print("   -x             do not check file extensions")
-    
+
+
 # set the defaults
 command = "cp"
 outputdir = "FIXME"
 checkextension = True
+sessionprefix = "mri"
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:],"hxc:o:",["command=","outputdir="])
+    opts, args = getopt.getopt(sys.argv[1:], "hxc:o:", ["command=", "outputdir="])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -70,9 +74,9 @@ for opt, arg in opts:
         outputdir = arg
     elif opt in ("-x"):
         checkextension = False
-            
+
 inputdirs = args
-if len(inputdirs)<1:
+if len(inputdirs) < 1:
     help(sys.argv[0])
     sys.exit(2)
 
@@ -108,81 +112,95 @@ for root, file, patient in zip(rootlist, filelist, patientlist):
     identifierlist.append(identifier)
 
 uniquepatient = sorted(list(set(patientlist)))
-uniqueseriesdescription = sorted(list(set(map(lambda n,s: '%03d-%s' % (n, s), seriesnumberlist, seriesdescriptionlist))))
+uniqueseriesdescription = sorted(
+    list(set(map(lambda n, s: '%03d-%s' % (n, s), seriesnumberlist, seriesdescriptionlist))))
 uniqueidentifier = sorted(list(set(identifierlist)))
 
 print('# found %d patient IDs' % len(uniquepatient))
 print('# found %d series' % len(uniqueseriesdescription))
 print('# constructed %d different identifiers from patient IDs and directories' % len(uniqueidentifier))
 
-sub=1 # this is incremented
-ses=1 # this remains the same
+sub = 1  # this is incremented
+ses = 1  # this remains the same
 subdir = []
 sesdir = []
 subvar = []
 sesvar = []
 for identifier in uniqueidentifier:
-    subdir.append("sub-%03d"    % sub)
-    subvar.append("SUB%03d"     % sub)
-    sesdir.append("ses-mri%02d" % ses)
-    sesvar.append("SES%02d"     % sub)  # note that this is correct, datasets are numbered sequentially in SUB and SES
+    subdir.append("sub-%03d" % sub)
+    subvar.append("SUB%03d" % sub)
+    sesdir.append("ses-%s%02d" % (sessionprefix, ses))
+    sesvar.append("SES%02d" % sub)  # note that this is correct, datasets are numbered sequentially in SUB and SES
     sub += 1
-    
-index=1
+
+index = 1
 protdir = []
 protvar = []
 for seriesdescription in uniqueseriesdescription:
-    protdir.append(seriesdescription) # fixme, check that the name is valid for a directory
+    protdir.append(seriesdescription)  # fixme, check that the name is valid for a directory
     protvar.append("PROT%03d" % index)
-    index+=1
-    
+    index += 1
+
 print("")
 print("# please verify the following general variables")
 print("OUTPUTDIR=%s" % outputdir)
 print("COMMAND=%s" % command)
 
-# give some examples
+# give some examples, note that quotation marks are needed in case there are spaces in the command
 print("")
-print("#COMMAND=cp")
-print("#COMMAND=mv")
+print("#COMMAND=\"cp\"")
+print("#COMMAND=\"mv\"")
+print("#COMMAND=\"ln\"")
 
 print("")
 print("# please verify the following subject and session identifier variables")
-for subv,subd,sesv,sesd,identifier in zip(subvar,subdir,sesvar,sesdir,uniqueidentifier):
-    print("%s=%s ; %s=%s  # %s" % (subv,subd,sesv,sesd,identifier))
+
+width1 = 0
+width2 = 0
+for subv, subd, sesv, sesd, identifier in zip(subvar, subdir, sesvar, sesdir, uniqueidentifier):
+    col1 = "%s=%s" % (subv, subd)
+    col2 = "%s=%s" % (sesv, sesd)
+    width1 = max(width1, len(col1))
+    width2 = max(width2, len(col2))
+for subv, subd, sesv, sesd, identifier in zip(subvar, subdir, sesvar, sesdir, uniqueidentifier):
+    col1 = "%s=%s" % (subv, subd)
+    col2 = "%s=%s" % (sesv, sesd)
+    col3 = "%s" % (identifier, )
+    print(col1.ljust(width1) + " ; " + col2.ljust(width2) + " # " + col3)
 
 print("")
 print("# please verify the following seriesdescription variables")
-for protv,protd in zip(protvar,protdir):
-    print("%s=%s" % (protv,protd))
+for protv, protd in zip(protvar, protdir):
+    print("%s=%s" % (protv, protd))
 
 print("")
 print("###### the script should not need any changes below this line ######")
 
 print("")
 print("# create the target directory structure")
-for subv,sesv in zip(subvar,sesvar):
+for subv, sesv in zip(subvar, sesvar):
     for protv in protvar:
-        print("mkdir -p %s" % os.path.join("$OUTPUTDIR", "$"+subv, "$"+sesv, "$"+protv))
+        print("mkdir -p %s" % os.path.join("$OUTPUTDIR", "$" + subv, "$" + sesv, "$" + protv))
 
 print("")
 print("# copy all the files")
 
-previous=None
-for root,file,identifier,seriesdescription,seriesnumber in zip(rootlist, filelist, identifierlist, seriesdescriptionlist, seriesnumberlist):
+previous = None
+for root, file, identifier, seriesdescription, seriesnumber in zip(rootlist, filelist, identifierlist, seriesdescriptionlist, seriesnumberlist):
     index_id = uniqueidentifier.index(identifier)
     index_pr = uniqueseriesdescription.index('%03d-%s' % (seriesnumber, seriesdescription))
-    if previous!=(index_id,index_pr):
+    if previous != (index_id, index_pr):
         # place a blank line between blocks of dicom files with the same identifier and seriesdescription
         # this facilitates visual parsing of the bash script
-        if previous!=None:
+        if previous != None:
             # no empty line at the start
             print("")
-        previous=(index_id,index_pr)
+        previous = (index_id, index_pr)
     fullfile1 = os.path.join(root, file)
-    fullfile2 = os.path.join("$OUTPUTDIR", '$'+subvar[index_id], '$'+sesvar[index_id], '$'+protvar[index_pr], file)
+    fullfile2 = os.path.join("$OUTPUTDIR", '$' + subvar[index_id],
+                             '$' + sesvar[index_id], '$' + protvar[index_pr], file)
     print("$COMMAND \"%s\" \"%s\"" % (fullfile1, fullfile2))
-    
+
 print("")
 print("# remove empty directories")
 print("find $OUTPUTDIR -type d -empty -delete")

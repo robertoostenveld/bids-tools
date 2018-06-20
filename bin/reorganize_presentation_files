@@ -54,7 +54,7 @@ outputdir = "FIXME"
 extension = "log"
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hc:o:", ["command=", "outputdir="])
+    opts, args = getopt.getopt(sys.argv[1:], "hc:o:x:", ["command=", "outputdir=", "extension="])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -66,6 +66,8 @@ for opt, arg in opts:
         command = arg
     elif opt in ("-o", "--outputdir"):
         outputdir = arg
+    elif opt in ("-x", "--extension"):
+        extension = arg
 
 inputdirs = args
 if len(inputdirs) < 1:
@@ -83,9 +85,6 @@ for dir in inputdirs:
                 filelist.append(file)
 
 print('# found %d presentation and behavioural log files in %d directories' % (len(filelist), len(set(rootlist))))
-
-print "rootlist", rootlist
-print "filelist", filelist
 
 identifierlist = []
 for root, file in zip(rootlist, filelist):

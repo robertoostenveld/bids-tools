@@ -7,14 +7,15 @@ This repository contains a number of tools to support the [BIDS](http://bids.neu
 This repository provides the following command-line tools to assist in the workflow:
   * [Reorganize existing DICOM datasets](doc/reorganize_dicom_dataset.md)
   * [Reorganize existing CTF datasets](doc/reorganize_ctf_dataset.md)
+  * [Reorganize existing BrainVision EEG datasets](doc/reorganize_brainvision_dataset.md)
+  * [Reorganize existing presentation and/or behavioural log files](doc/reorganize_presentation_files.md)
   * [Convert raw data to BIDS](doc/convert_raw_to_bids.md)
   * [Create sidecar files](doc/create_sidecar_files.md)
 
 The specific details of the BIDS standard can be found elsewhere:
   * [General and MRI](http://bit.ly/bids_mri)
-  * [MEG](http://bit.ly/bids_meg)
+  * [MEG](http://bit.ly/bids_mri)
   * [EEG](http://bit.ly/bids_eeg)
   * [iEEG](http://bit.ly/bids_ieeg)
 
 If you have suggestions or contributions, please fork this repository, make the changes in your clone and send me a pull request.
-

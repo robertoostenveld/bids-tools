@@ -2,7 +2,7 @@
 
 *You should also check out the DCCN-specific [dac2bids](https://github.com/dangom/dac2bids) utilities or at [heudiconv](https://github.com/nipy/heudiconv), which is a similar tool with more features (and more complexity).*
 
-This is a BIDS conversion utility to reorganize existing MRI DICOM datasets. It works on a collection of DICOM files in a single directory or over multiple directories. It copies or moves the files according to the standard BIDS structure that we started using from 2017 onwards at the DCCN.
+This is a BIDS conversion utility to reorganize existing MRI DICOM datasets. It works on a collection of DICOM files in a single directory or over multiple directories. It copies or moves the files according to the source BIDS structure that we started using from 2017 onwards at the DCCN.
 
 It is an executable Python script which you can run from the Linux command line. It creates a Bash shell script which you should save to file, check and where needed edit (i.e. rename subject identifiers) and subsequently execute using bash. Further details are provided if you execute it without any arguments:
 
@@ -24,4 +24,3 @@ It is an executable Python script which you can run from the Linux command line.
 ```
 
 Following this tool, you would probably continue with converting the DICOM files in the "source" structure into NIfTI files. For that you can have a look at [convert_raw_to_bids](convert_raw_to_bids.md) or at [dac2bids](https://github.com/dangom/dac2bids).
-

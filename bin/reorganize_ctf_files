@@ -22,6 +22,7 @@ import os
 import sys
 import re
 import getopt
+import numpy as np
 
 if hasattr(sys, 'frozen'):
     basis = sys.executable
@@ -110,11 +111,12 @@ subdir = []
 sesdir = []
 subvar = []
 sesvar = []
+width = int(np.floor(np.log10(len(uniqueidentifier)))+1)
 for identifier in uniqueidentifier:
-    subdir.append("sub-%03d" % sub)
-    subvar.append("SUB%03d" % sub)
-    sesdir.append("ses-%s%02d" % (sessionprefix, ses))
-    sesvar.append("SES%02d" % sub)
+    subdir.append('sub-{pre}{num:{fill}{width}}'.format(pre=subjectprefix, num=sub, fill='0', width=3))
+    subvar.append('SUB{num:{fill}{width}}'.format(num=sub, fill='0', width=width))
+    sesdir.append('ses-{pre}{num:{fill}{width}}'.format(pre=sessionprefix, num=ses, fill='0', width=2))
+    sesvar.append('SES{num:{fill}{width}}'.format(num=sub, fill='0', width=width))
     sub += 1
 
 print("")
@@ -164,7 +166,7 @@ newname = []
 for root, file, identifier in zip(rootlist, filelist, identifierlist):
     index_id = uniqueidentifier.index(identifier)
     oldname.append(os.path.join(root, file))
-    newname.append(os.path.join("$OUTPUTDIR", '$' + subvar[index_id], '$' + sesvar[index_id], "behav", file))
+    newname.append(os.path.join("$OUTPUTDIR", '$' + subvar[index_id], '$' + sesvar[index_id], "meg", file))
 
 if len(oldname):
     width = max((len(x), x) for x in oldname)[0]

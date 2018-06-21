@@ -22,6 +22,17 @@ import os
 import sys
 import re
 import getopt
+
+if hasattr(sys, 'frozen'):
+    basis = sys.executable
+elif sys.argv[0]!='':
+    basis = sys.argv[0]
+else:
+    basis = './'
+installed_folder = os.path.split(basis)[0]
+
+# bin contains this file, lib contains shared modules
+sys.path.insert(0,os.path.join(installed_folder,'../lib'))
 import pydicom as dicom
 
 if hasattr(sys, 'frozen'):

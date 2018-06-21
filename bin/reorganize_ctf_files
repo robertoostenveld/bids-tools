@@ -47,18 +47,21 @@ def help(name):
     print('  %s -c <command> -o <outputdir> [inputdir]' % name)
     print("")
     print("Optional arguments")
-    print("   -c <command>   command to execute, eg. mv or cp")
-    print("   -o <outputdir> output directory")
+    print("   -c <command>               command to execute, eg. mv or cp")
+    print("   -o <outputdir>             output directory")
+    print("   --subjectprefix=<string>   subject prefix (default = \"\")")
+    print("   --sessionprefix=<string>   session prefix (default = \"meg\")")
     print("")
 
 
 # set the defaults
-command = "moveDs"
+command = "cp"
 outputdir = "FIXME"
+subjectprefix = ""
 sessionprefix = "meg"
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hc:o:", ["command=", "outputdir="])
+    opts, args = getopt.getopt(sys.argv[1:], "hc:o:", ["command=", "outputdir=", "subjectprefix=", "sessionprefix="])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -70,6 +73,10 @@ for opt, arg in opts:
         command = arg
     elif opt in ("-o", "--outputdir"):
         outputdir = arg
+    elif opt in ("--subjectprefix"):
+        subjectprefix = arg
+    elif opt in ("--sessionprefix"):
+        sessionprefix = arg
 
 inputdirs = args
 if len(inputdirs) < 1:

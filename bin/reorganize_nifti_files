@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# BIDS conversion utility for presentation and behavioural log files
+# BIDS conversion utility for nifti files
 #
 # Copyright (C) 2017-2018, Robert Oostenveld
 #
@@ -22,6 +22,7 @@ import os
 import sys
 import re
 import getopt
+import numpy as np
 
 if hasattr(sys, 'frozen'):
     basis = sys.executable
@@ -37,9 +38,9 @@ sys.path.insert(0, os.path.join(installed_folder, '../lib'))
 
 def help(name):
     print("")
-    print("This script searches through a directory for all stimulus presentation and behavioural")
-    print("log files and prints them to the output screen in such a way that you can easily make")
-    print("a script to reorganize your files to BIDS.")
+    print("This script searches through a directory for all nifti files and prints")
+    print("them to the output screen in such a way that you can easily make a script")
+    print("to reorganize your files to BIDS.")
     print("")
     print("You should save the output to a script, edit the script and then execute it.")
     print("")
@@ -49,13 +50,10 @@ def help(name):
     print("Optional arguments")
     print("   -c <command>               command to execute, eg. mv or cp")
     print("   -o <outputdir>             output directory")
-    print("   -x <extension>             file extension (default = \"log\")")
     print("   --subjectprefix=<string>   subject prefix (default = \"\")")
-    print("   --sessionprefix=<string>   session prefix (default = \"beh\")")
+    print("   --sessionprefix=<string>   session prefix (default = \"mri\")")
+    print("   --datatype=<string>        data type, can be anat|func|dwi|fmap (default = \"anat\")")
     print("")
-    print("It is possible that the behavioural data is recorded during an MRI session; in")
-    print("that case you should specify \"mri\" as session prefix. The default is \"beh\",")
-    print("resulting in a naming scheme such as sub-001/ses-beh01.")
 
 
 # set the defaults
@@ -63,7 +61,8 @@ command = "cp"
 outputdir = "FIXME"
 extension = "log"
 subjectprefix = ""
-sessionprefix = "beh"
+sessionprefix = "mri"
+datatype="anat"
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "hc:o:x:", ["command=", "outputdir=", "extension=", "subjectprefix=", "sessionprefix="])
@@ -78,8 +77,6 @@ for opt, arg in opts:
         command = arg
     elif opt in ("-o", "--outputdir"):
         outputdir = arg
-    elif opt in ("-x", "--extension"):
-        extension = arg
     elif opt in ("--subjectprefix"):
         subjectprefix = arg
     elif opt in ("-s", "--sessionprefix"):
@@ -96,11 +93,11 @@ for dir in inputdirs:
     print('# scanning directory structure starting at %s' % dir)
     for root, dirs, files in os.walk(dir):
         for file in files:
-            if re.match('^.*\.%s$' % extension, file):
-                rootlist.append(root)  # the directory containing the dataset
+            if re.match('^.*\.nii$', file) or re.match('^.*\.nii.gz$', file):
+                rootlist.append(root)  # the directory containing the nifti file
                 filelist.append(file)
 
-print('# found %d presentation and behavioural log files in %d directories' % (len(filelist), len(set(rootlist))))
+print('# found %d nifti log files in %d directories' % (len(filelist), len(set(rootlist))))
 
 identifierlist = []
 for root, file in zip(rootlist, filelist):
@@ -111,17 +108,25 @@ for root, file in zip(rootlist, filelist):
 uniqueidentifier = sorted(list(set(identifierlist)))
 print('# constructed %d different identifiers' % len(uniqueidentifier))
 
+num = 1
 sub = 1
 ses = 1
+typ = 1
 subdir = []
 sesdir = []
+typdir = []
 subvar = []
 sesvar = []
+typvar = []
+width = int(np.floor(np.log10(len(uniqueidentifier)))+1)
 for identifier in uniqueidentifier:
-    subdir.append("sub-%03d" % sub)
-    subvar.append("SUB%03d" % sub)
-    sesdir.append("ses-%s%02d" % (sessionprefix, ses))
-    sesvar.append("SES%03d" % sub)
+    subdir.append('sub-{pre}{num:{fill}{width}}'.format(pre=subjectprefix, num=sub, fill='0', width=3))
+    subvar.append('SUB{num:{fill}{width}}'.format(num=num, fill='0', width=width))
+    sesdir.append('ses-{pre}{num:{fill}{width}}'.format(pre=sessionprefix, num=ses, fill='0', width=2))
+    sesvar.append('SES{num:{fill}{width}}'.format(num=num, fill='0', width=width))
+    typdir.append(datatype)
+    typvar.append('TYP{num:{fill}{width}}'.format(num=num, fill='0', width=width))
+    num += 1
     sub += 1
 
 print("")
@@ -137,28 +142,32 @@ print("#COMMAND=\"rsync -arpv\"")
 print("#COMMAND=\"ln\"")
 
 print("")
-print("# please verify the following subject and session identifier variables")
+print("# please verify the following subject and session identifier variables and the MR type")
 
 width1 = 0
 width2 = 0
-for subv, subd, sesv, sesd, identifier in zip(subvar, subdir, sesvar, sesdir, uniqueidentifier):
+width3 = 0
+for subv, subd, sesv, sesd, typv, typd, identifier in zip(subvar, subdir, sesvar, sesdir, typvar, typdir, uniqueidentifier):
     col1 = "%s=%s" % (subv, subd)
     col2 = "%s=%s" % (sesv, sesd)
+    col3 = "%s=%s" % (typv, typd)
     width1 = max(width1, len(col1))
     width2 = max(width2, len(col2))
-for subv, subd, sesv, sesd, identifier in zip(subvar, subdir, sesvar, sesdir, uniqueidentifier):
+    width3 = max(width3, len(col3))
+for subv, subd, sesv, sesd, typv, typd, identifier in zip(subvar, subdir, sesvar, sesdir, typvar, typdir, uniqueidentifier):
     col1 = "%s=%s" % (subv, subd)
     col2 = "%s=%s" % (sesv, sesd)
-    col3 = "%s" % (identifier, )
-    print(col1.ljust(width1) + " ; " + col2.ljust(width2) + " # " + col3)
+    col3 = "%s=%s" % (typv, typd)
+    col4 = "%s" % (identifier, )
+    print(col1.ljust(width1) + " ; " + col2.ljust(width2) + " ; " + col3.ljust(width3) + " # " + col4)
 
 print("")
 print("###### the script should not need any changes below this line ######")
 
 print("")
 print("# create the target directory structure")
-for subv, sesv in zip(subvar, sesvar):
-    print("mkdir -p %s" % os.path.join("$OUTPUTDIR", "$" + subv, "$" + sesv, "beh"))
+for subv, sesv, typv in zip(subvar, sesvar, typvar):
+    print("mkdir -p %s" % os.path.join("$OUTPUTDIR", "$" + subv, "$" + sesv, "$" + typv))
 
 print("")
 print("# copy all the files")
@@ -168,7 +177,7 @@ newname = []
 for root, file, identifier in zip(rootlist, filelist, identifierlist):
     index_id = uniqueidentifier.index(identifier)
     oldname.append(os.path.join(root, file))
-    newname.append(os.path.join("$OUTPUTDIR", '$' + subvar[index_id], '$' + sesvar[index_id], "beh", file))
+    newname.append(os.path.join("$OUTPUTDIR", '$' + subvar[index_id], '$' + sesvar[index_id], '$' + typvar[index_id], file))
 
 if len(oldname):
     width = max((len(x), x) for x in oldname)[0]

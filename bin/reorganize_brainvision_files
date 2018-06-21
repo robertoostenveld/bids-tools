@@ -44,12 +44,13 @@ def help(name):
     print("You should save the output to a script, edit the script and then execute it.")
     print("")
     print("Use as")
-    print('  %s -c <command> -o <outputdir> -s <sessionprefix> [inputdir]' % name)
+    print('  %s -c <command> -o <outputdir> [inputdir]' % name)
     print("")
     print("Optional arguments")
-    print("   -c <command>          command to execute, eg. mv or cp")
-    print("   -o <outputdir>        output directory")
-    print("   -s <sessionprefix>    session prefix (default = \"eeg\")")
+    print("   -c <command>               command to execute, eg. mv or cp")
+    print("   -o <outputdir>             output directory")
+    print("   --subjectprefix=<string>   subject prefix (default = \"\")")
+    print("   --sessionprefix=<string>   session prefix (default = \"eeg\")")
     print("")
     print("It is possible that the EEG data is recorded during an MRI session; in")
     print("that case you should specify \"mri\" as the session prefix. The default ")
@@ -60,10 +61,11 @@ def help(name):
 # set the defaults
 command = "cp"
 outputdir = "FIXME"
+subjectprefix = ""
 sessionprefix = "eeg"
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hc:o:s:", ["command=", "outputdir=", "sessionprefix="])
+    opts, args = getopt.getopt(sys.argv[1:], "hc:o:", ["command=", "outputdir=", "subjectprefix=", "sessionprefix="])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -75,7 +77,9 @@ for opt, arg in opts:
         command = arg
     elif opt in ("-o", "--outputdir"):
         outputdir = arg
-    elif opt in ("-s", "--sessionprefix"):
+    elif opt in ("--subjectprefix"):
+        subjectprefix = arg
+    elif opt in ("--sessionprefix"):
         sessionprefix = arg
 
 inputdirs = args

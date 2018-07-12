@@ -20,7 +20,7 @@ Optional arguments
 ```
 
 See also
-  * [reorganize_dicom_files](reorganize_dicom_files.md)
   * [reorganize_brainvision_files](reorganize_brainvision_files.md)
+  * [reorganize_dicom_files](reorganize_dicom_files.md)
   * [reorganize_presentation_files](reorganize_presentation_files.md)
   

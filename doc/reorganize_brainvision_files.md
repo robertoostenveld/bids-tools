@@ -27,5 +27,6 @@ is "eeg", resulting in a naming scheme such as sub-001/ses-eeg01.
 See also
   * [reorganize_ctf_files](reorganize_ctf_files.md)
   * [reorganize_dicom_files](reorganize_dicom_files.md)
+  * [reorganize_nifti_files](reorganize_nifti_files.md)
   * [reorganize_presentation_files](reorganize_presentation_files.md)
   

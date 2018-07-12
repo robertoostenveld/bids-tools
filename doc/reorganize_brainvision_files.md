@@ -23,3 +23,9 @@ It is possible that the EEG data is recorded during an MRI session; in
 that case you should specify "mri" as the session prefix. The default
 is "eeg", resulting in a naming scheme such as sub-001/ses-eeg01.
 ```
+
+See also
+  * [reorganize_ctf_files](reorganize_ctf_files.md)
+  * [reorganize_dicom_files](reorganize_dicom_files.md)
+  * [reorganize_presentation_files](reorganize_presentation_files.md)
+  

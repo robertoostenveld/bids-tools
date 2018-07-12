@@ -30,4 +30,5 @@ See also
   * [reorganize_ctf_files](reorganize_ctf_files.md)
   * [reorganize_brainvision_files](reorganize_brainvision_files.md)
   * [reorganize_dicom_files](reorganize_dicom_files.md)
+  * [reorganize_nifti_files](reorganize_nifti_files.md)
   

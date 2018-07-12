@@ -27,5 +27,10 @@ Alternatives for converting DICOM files to BIDS/NIfTI are:
   * [heudiconv](https://github.com/nipy/heudiconv)
   * [pyBIDSconv](https://github.com/DrMichaelLindner/pyBIDSconv)
   
+See also
+  * [reorganize_ctf_files](reorganize_ctf_files.md)
+  * [reorganize_brainvision_files](reorganize_brainvision_files.md)
+  * [reorganize_presentation_files](reorganize_presentation_files.md)
+  
 
 

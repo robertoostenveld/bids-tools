@@ -25,3 +25,9 @@ that case you should specify "mri" as session prefix. The default is "behav",
 resulting in a naming scheme such as sub-001/ses-behav01.
 
 ```
+
+See also
+  * [reorganize_ctf_files](reorganize_ctf_files.md)
+  * [reorganize_brainvision_files](reorganize_brainvision_files.md)
+  * [reorganize_dicom_files](reorganize_dicom_files.md)
+  

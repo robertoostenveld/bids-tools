@@ -30,6 +30,7 @@ Alternatives for converting DICOM files to BIDS/NIfTI are:
 See also
   * [reorganize_brainvision_files](reorganize_brainvision_files.md)
   * [reorganize_ctf_files](reorganize_ctf_files.md)
+  * [reorganize_nifti_files](reorganize_nifti_files.md)
   * [reorganize_presentation_files](reorganize_presentation_files.md)
   
 

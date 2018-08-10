@@ -182,7 +182,18 @@ def writeTSV(filename, data):
 
 def createSidecarANAT(root, sub, ses):
   if create_all or create_anat:
-    print 'createSidecarANAT', root, sub, ses
+    typ = 'anat'
+    if ses==None:
+        dirname = os.path.join(root, sub, typ)
+        basename = sub
+    else:
+        dirname = os.path.join(root, sub, ses, typ)
+        basename = sub + '_' + ses
+
+    for run in listScans(os.path.join(dirname), 'anat'):
+        (run, ext) = os.path.splitext(run)
+        filename = os.path.join(dirname, run + '.json')
+        writeJSON(filename, sidecar.anat.anat)
 
 def createSidecarDWI(root, sub, ses):
   if create_all:
@@ -210,10 +221,8 @@ def createSidecarMEG(root, sub, ses):
         dirname = os.path.join(root, sub, ses, typ)
         basename = sub + '_' + ses
 
-    filename = os.path.join(dirname, basename + '_fidinfo.txt')
-    writeASCII(filename, sidecar.meg.fidinfo)
-    filename = os.path.join(dirname, basename + '_fid.json')
-    writeJSON(filename, sidecar.meg.fid)
+    filename = os.path.join(dirname, basename + '_coordinatesystem.json')
+    writeJSON(filename, sidecar.meg.coordinatesystem)
     filename = os.path.join(dirname, basename + '_scans.tsv')
     writeTSV(filename, sidecar.meg.scans)
 

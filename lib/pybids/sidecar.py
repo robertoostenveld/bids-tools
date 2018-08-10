@@ -44,6 +44,13 @@ class common:
         'SubjectArtefactDescription': 'n/a',
     }
 
+    coordsystem = {
+        'AnatomicalLandmarkCoordinates': 'n/a',
+        'AnatomicalLandmarkCoordinateSystem': 'n/a',
+        'AnatomicalLandmarkCoordinateUnits': 'n/a',
+        'AnatomicalLandmarkCoordinateSystemDescription': 'n/a',
+    }
+
     scans = OrderedDict()
     scans['filename'] = []
     scans['acq_time'] = []
@@ -121,7 +128,7 @@ class anat:
     # anat.json
 
     anat = {};
-    for d in (common.scanner, common.mrsequence):
+    for d in (common.scanner, common.mrsequence, common.coordsystem):
         anat.update(d)
 
 ####################################################################################
@@ -179,38 +186,32 @@ class beh:
 ####################################################################################
 class meg:
     # SESSION specific files
-    # _fid.json
+    # _coordsystem.json
     # _photo.jpg
-    # _fidinfo.txt
     # _scans.tsv
     # _headshape.<manufacturer_specific_format>
 
     scans = common.scans
 
-    fid = {
+    coordsystem = {
         'MEGCoordinateSystem': 'n/a',
+        'EEGCoordinateUnits': 'n/a',
         'MEGCoordinateSystemDescription': 'n/a',
         'EEGCoordinateSystem': 'n/a',
         'EEGCoordinateUnits': 'n/a',
         'EEGCoordinateSystemDescription': 'n/a',
-        'IntendedFor': 'n/a',
-        'AnatomicalMRICoordinateSystem': 'n/a',
-        'AnatomicalMRICoordinateSystemDescription': 'n/a',
-        'CoilCoordinates': 'n/a',
-        'CoilCoordinateSystem': 'n/a',
-        'CoilCoordinateUnits': 'n/a',
-        'CoilCoordinateSystemDescription': 'n/a',
-        'LandmarkCoordinates': 'n/a',
-        'LandmarkCoordinateSystem': 'n/a',
-        'LandmarkCoordinateUnits': 'n/a',
-        'LandmarkCoordinateSystemDescription': 'n/a',
+        'HeadCoilCoordinates': 'n/a',
+        'HeadCoilCoordinateSystem': 'n/a',
+        'HeadCoilCoordinateUnits': 'n/a',
+        'HeadCoilCoordinateSystemDescription': 'n/a',
         'DigitizedHeadPoints': 'n/a',
         'DigitizedHeadPointsCoordinateSystem': 'n/a',
         'DigitizedHeadPointsCoordinateUnits': 'n/a',
         'DigitizedHeadPointsCoordinateSystemDescription': 'n/a',
+        'IntendedFor': 'n/a'
     }
-
-    fidinfo = ''
+    for d in (common.coordsystem, ):
+        coordsystem.update(d)
 
     # RUN specific files
     # _meg.json

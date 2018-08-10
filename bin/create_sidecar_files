@@ -192,6 +192,7 @@ def createSidecarANAT(root, sub, ses):
 
     for run in listScans(os.path.join(dirname), 'anat'):
         (run, ext) = os.path.splitext(run)
+        run = run[0:-4] # skip the _T1w at the end of the filename
         filename = os.path.join(dirname, run + '.json')
         writeJSON(filename, sidecar.anat.anat)
 
@@ -228,6 +229,7 @@ def createSidecarMEG(root, sub, ses):
 
     for run in listScans(os.path.join(dirname), 'meg'):
         (run, ext) = os.path.splitext(run)
+        run = run[0:-4]  # skip the _meg at the end of the filename
         filename = os.path.join(dirname, run + '_meg.json')
         writeJSON(filename, sidecar.meg.meg)
         filename = os.path.join(dirname, run + '_channels.tsv')

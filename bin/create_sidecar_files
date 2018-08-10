@@ -30,6 +30,7 @@ import getopt
 import csv
 import json
 from collections import OrderedDict
+import copy
 
 if hasattr(sys, 'frozen'):
     basis = sys.executable
@@ -62,6 +63,7 @@ def help(name):
     print ''
     print '  --participants     create the participants.tsv file'
     print '  --sessions         create the sessions.tsv files (per subject)'
+    print '  --scans            create the scans.tsv files (per subject and session)'
     print '  --anat             create the sidecar files for the specific datatype (per subject and session)'
     print '  --meg              create the sidecar files for the specific datatype (per subject and session)'
     print '  --eeg              create the sidecar files for the specific datatype (per subject and session)'
@@ -75,6 +77,7 @@ force = False
 create_all = True
 create_participants = False
 create_sessions = False
+create_scans = False
 create_anat = False
 create_beh = False
 create_eeg = False
@@ -82,7 +85,7 @@ create_ieeg = False
 create_meg = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:],'htf',['test','force','participants','sessions','anat','beh','eeg','ieeg','meg'])
+    opts, args = getopt.getopt(sys.argv[1:],'htf',['test','force','participants','sessions','scans','anat','beh','eeg','ieeg','meg'])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -100,6 +103,9 @@ for opt, arg in opts:
     elif opt in ('--sessions'):
         create_sessions = True
         create_all = False
+    elif opt in ('--scans'):
+        create_scans = True
+        create_all = False
     elif opt in ('--anat'):
         create_anat = True
         create_all = False
@@ -115,7 +121,6 @@ for opt, arg in opts:
     elif opt in ('--meg'):
         create_meg = True
         create_all = False
-
 
 inputdirs = args
 if len(inputdirs)!=1:
@@ -190,7 +195,7 @@ def createSidecarANAT(root, sub, ses):
         dirname = os.path.join(root, sub, ses, typ)
         basename = sub + '_' + ses
 
-    for run in listScans(os.path.join(dirname), 'anat'):
+    for run in listScans(dirname, 'anat'):
         (run, ext) = os.path.splitext(run)
         run = run[0:-4] # skip the _T1w at the end of the filename
         filename = os.path.join(dirname, run + '.json')
@@ -224,10 +229,8 @@ def createSidecarMEG(root, sub, ses):
 
     filename = os.path.join(dirname, basename + '_coordsystem.json')
     writeJSON(filename, sidecar.meg.coordsystem)
-    filename = os.path.join(dirname, basename + '_scans.tsv')
-    writeTSV(filename, sidecar.meg.scans)
 
-    for run in listScans(os.path.join(dirname), 'meg'):
+    for run in listScans(dirname, 'meg'):
         (run, ext) = os.path.splitext(run)
         run = run[0:-4]  # skip the _meg at the end of the filename
         filename = os.path.join(dirname, run + '_meg.json')
@@ -245,6 +248,20 @@ def createSidecarIEEG(root, sub, ses):
   if create_all or create_ieeg:
     print 'createSidecarIEEG', root, sub, ses
 
+def createSidecarScans(root, sub, ses):
+  if create_all or create_scans:
+    if ses==None:
+        scanlist = listAllScans(os.path.join(root, sub))
+        filename = os.path.join(os.path.join(root, sub, sub + '_scans.tsv'))
+    else:
+        scanlist = listAllScans(os.path.join(root, sub, ses))
+        filename = os.path.join(os.path.join(root, sub, ses, sub + '_' + ses + '_scans.tsv'))
+    scans = copy.deepcopy(sidecar.scans)
+    for scan in scanlist:
+      scans['filename'].append(scan)
+      scans['acq_time'].append('n/a')
+    writeTSV(filename, scans)
+
 def createSidecarSessions(root, sub):
   if create_all or create_sessions:
     filename = os.path.join(root, sub, 'sessions.tsv')
@@ -252,8 +269,9 @@ def createSidecarSessions(root, sub):
     for ses in os.listdir(os.path.join(root, sub)):
         if re.match('^ses-[a-zA-Z0-9]*$', ses):
             session.append(ses)
-    data = {'session_id': session}
-    writeTSV(filename, data)
+    if len(ses)>0:
+        data = {'session_id': session}
+        writeTSV(filename, data)
 
 def createSidecarREADME(root):
   if create_all:
@@ -287,18 +305,31 @@ def createSidecarParticipants(root):
     writeTSV(filename, participants)
 
 ################################################################################################
-def listScans(root, typ):
+def listAllScans(root):
+    # list all runs of all data types, this includes the type
     runs = []
-    for file in os.listdir(root):
-        if typ=='meg' and re.match('^.*\.ds$', file):
-            runs.append(file)
-        if typ=='meg' and re.match('^.*\.fif$', file):
-            runs.append(file)
-        if typ=='anat' and (re.match('^.*\.nii$', file) or re.match('^.*\.nii.gz$', file)):
-            runs.append(file)
-        if typ=='func' and (re.match('^.*\.nii$', file) or re.match('^.*\.nii.gz$', file)):
-            runs.append(file)
+    for t in datatype:
+        for l in listScans(root, t):
+          runs.append(os.path.join(t, l))
     return runs
+
+def listScans(root, typ):
+   # list the runs of the specific data type
+   runs = []
+   dirname = os.path.join(root, typ)
+   if os.path.isdir(dirname):
+       for file in os.listdir(dirname):
+           if typ=='meg' and (re.match('^.*\.ds$', file) or re.match('^.*\.fif$', file)):
+               runs.append(file)
+           if typ=='eeg' and (re.match('^.*\.vhdr$', file) or re.match('^.*\.edf$', file)):
+               runs.append(file)
+           if typ=='anat' and (re.match('^.*\.nii$', file) or re.match('^.*\.nii.gz$', file)):
+               runs.append(file)
+           if typ=='func' and (re.match('^.*\.nii$', file) or re.match('^.*\.nii.gz$', file)):
+               runs.append(file)
+           if typ=='dwi' and (re.match('^.*\.nii$', file) or re.match('^.*\.nii.gz$', file)):
+               runs.append(file)
+   return runs
 
 ################################################################################################
 # the following section deals with parsing the directory and file structure
@@ -321,6 +352,7 @@ for sub in os.listdir(root):
             # sub-001/ses-mri01
             if re.match('^ses-[a-zA-Z0-9]*$', ses):
                 hasSes = True
+                createSidecarScans(root, sub, ses)
                 for typ in os.listdir(os.path.join(root, sub, ses)):
                     if not os.path.isdir(os.path.join(root, sub, ses, typ)):
                         continue
@@ -374,6 +406,8 @@ for sub in os.listdir(root):
 
     if hasSes:
         createSidecarSessions(root, sub)
+    else:
+        createSidecarScans(root, sub, None)
 
 if hasSub:
     createSidecarREADME(root)

@@ -51,10 +51,6 @@ class common:
         'AnatomicalLandmarkCoordinateSystemDescription': 'n/a',
     }
 
-    scans = OrderedDict()
-    scans['filename'] = []
-    scans['acq_time'] = []
-
     electrodes = OrderedDict()
     electrodes['name'] = []
     electrodes['x'] = []
@@ -118,11 +114,13 @@ sessions['session_id'] = []
 sessions['acq_time'] = []
 
 ####################################################################################
+scans = OrderedDict()
+scans['filename'] = []
+scans['acq_time'] = []
+
+####################################################################################
 class anat:
     # SESSION specific files
-    # _scans.tsv
-
-    scans = common.scans
 
     # RUN specific files
     # anat.json
@@ -134,9 +132,6 @@ class anat:
 ####################################################################################
 class dwi:
     # SESSION specific files
-    # _scans.tsv
-
-    scans = common.scans
 
     # RUN specific files
     # _dwi.json
@@ -148,9 +143,6 @@ class dwi:
 ####################################################################################
 class func:
     # SESSION specific files
-    # _scans.tsv
-
-    scans = common.scans
 
     # RUN specific files
     # _bold.json
@@ -165,9 +157,6 @@ class func:
 ####################################################################################
 class fmap:
     # SESSION specific files
-    # _scans.tsv
-
-    scans = common.scans
 
     # RUN specific files
     # fmap.json
@@ -190,8 +179,6 @@ class meg:
     # _photo.jpg
     # _scans.tsv
     # _headshape.<manufacturer_specific_format>
-
-    scans = common.scans
 
     coordsystem = {
         'MEGCoordinateSystem': 'n/a',
@@ -248,9 +235,6 @@ class meg:
 class eeg:
     # SESSION specific files
     # _electrodes.tsv
-    # _scans.tsv
-
-    scans = common.scans
 
     electrodes = common.electrodes
 
@@ -274,9 +258,6 @@ class ieeg:
     # _acq-<label>_electrodes.json
     # _photo.jpg
     # _electrodesinfo.txt
-    # _scans.tsv
-
-    scans = common.scans
 
     electrodes = common.electrodes
     electrodes['size'] = []

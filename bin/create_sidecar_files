@@ -221,8 +221,8 @@ def createSidecarMEG(root, sub, ses):
         dirname = os.path.join(root, sub, ses, typ)
         basename = sub + '_' + ses
 
-    filename = os.path.join(dirname, basename + '_coordinatesystem.json')
-    writeJSON(filename, sidecar.meg.coordinatesystem)
+    filename = os.path.join(dirname, basename + '_coordsystem.json')
+    writeJSON(filename, sidecar.meg.coordsystem)
     filename = os.path.join(dirname, basename + '_scans.tsv')
     writeTSV(filename, sidecar.meg.scans)
 

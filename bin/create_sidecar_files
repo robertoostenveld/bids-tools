@@ -61,6 +61,7 @@ def help(name):
     print 'you specify any of the following options, only these specific sidecar'
     print 'files will be created and all others will be skipped.'
     print ''
+    print '  --description      create the dataset_description.json file'
     print '  --participants     create the participants.tsv file'
     print '  --sessions         create the sessions.tsv files (per subject)'
     print '  --scans            create the scans.tsv files (per subject and session)'
@@ -75,6 +76,7 @@ def help(name):
 test = False
 force = False
 create_all = True
+create_description = False
 create_participants = False
 create_sessions = False
 create_scans = False
@@ -85,7 +87,7 @@ create_ieeg = False
 create_meg = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:],'htf',['test','force','participants','sessions','scans','anat','beh','eeg','ieeg','meg'])
+    opts, args = getopt.getopt(sys.argv[1:],'htf',['test','force','description','participants','sessions','scans','anat','beh','eeg','ieeg','meg'])
 except getopt.GetoptError:
     help(sys.argv[0])
     sys.exit(2)
@@ -97,6 +99,9 @@ for opt, arg in opts:
         test = True
     elif opt in ('-f', '--force'):
         force = True
+    elif opt in ('--description'):
+        create_description = True
+        create_all = False
     elif opt in ('--participants'):
         create_participants = True
         create_all = False
@@ -289,7 +294,7 @@ def createSidecarTask(root, task):
     writeJSON(filename, sidecar.task)
 
 def createSidecarDatasetDescription(root):
-  if create_all:
+  if create_all or create_description:
     filename = os.path.join(root, 'dataset_description.json')
     writeJSON(filename, sidecar.dataset_description)
 

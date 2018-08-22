@@ -409,10 +409,10 @@ for sub in os.listdir(root):
             # if len(listScans(os.path.join(root, sub)), 'meg')>0:
             #    createSidecarMEG(root, sub)
 
-    if hasSes:
-        createSidecarSessions(root, sub)
-    else:
-        createSidecarScans(root, sub, None)
+        if hasSes:
+            createSidecarSessions(root, sub)
+        else:
+            createSidecarScans(root, sub, None)
 
 if hasSub:
     createSidecarREADME(root)

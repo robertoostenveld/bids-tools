@@ -1,0 +1,112 @@
+#!/bin/bash
+#
+# Copyright (C) 2018, Robert Oostenveld
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+displayhelp() { 
+echo 
+echo This utility removes the date and time of acquisition from a CTF dataset.
+echo
+echo You should also use newDs with the -anon option to remove subject identifiers.
+echo
+echo Use as
+echo $0 [-d] [-t] '<DATASET>'
+echo
+echo Optional arguments are
+echo   -d      remove the date from the res4 file
+echo   -t      remove the time from the res4 file
+echo 
+}
+
+echoerr() {
+echo "$@" 1>&2;
+}
+
+function replaceByte() {
+# See https://stackoverflow.com/questions/4783657/cli-write-byte-at-address-hexedit-modify-binary-from-the-command-line
+# param 1: file
+# param 2: offset
+# param 3: value
+    printf "$(printf '\\x%02X' $3)" | dd of="$1" bs=1 seek=$2 count=1 conv=notrunc &> /dev/null
+}
+
+##############################################################################
+# parse command line arguments
+##############################################################################
+
+REMOVEDATE=0
+REMOVETIME=0
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -h|--help)
+    displayhelp
+    exit 0
+    ;;
+    -d|--date)
+    REMOVEDATE=1
+    shift # past argument
+    ;;
+    -t|--time)
+    REMOVETIME=1
+    shift # past argument
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+DATASET=$(realpath "$1")
+
+##############################################################################
+# test the options
+##############################################################################
+
+if [ -z ${DATASET} ]; then
+echoerr ERROR: dataset directory must be specified
+exit 1
+fi
+
+if [ $REMOVEDATE = 0 -a $REMOVETIME = 0 ] ; then
+echoerr ERROR: either date and/or time should be specified to be removed
+exit 1
+fi
+
+##############################################################################
+# do the work
+##############################################################################
+
+if [ $REMOVETIME = 1 ] ; then 
+echo removing time from ${DATASET}
+OFFSET=778
+# please note that the command continues far to the right
+printf "00:00                                                                                                                                                                                                                                                          " | dd of=${DATASET} bs=1 seek=$OFFSET count=255 conv=notrunc &> /dev/null
+fi
+
+if [ $REMOVEDATE = 1 ] ; then 
+echo removing date from ${DATASET}
+OFFSET=1033
+# please note that the command continues far to the right
+printf "01-Jan-1970                                                                                                                                                                                                                                                    " | dd of=${DATASET} bs=1 seek=$OFFSET count=255 conv=notrunc &> /dev/null 
+fi
+

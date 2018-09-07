@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+# Copyright (C) 2018, Robert Oostenveld
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+
+displayhelp() { 
+echo 
+echo This utility removes the date and time of acquisition from a CTF dataset.
+echo
+echo You should also use newDs with the -anon option to remove subject identifiers.
+echo
+echo Use as
+echo $0 '<DATASET>'
+echo
+}
+
+function replaceByte() {
+# See https://stackoverflow.com/questions/4783657/cli-write-byte-at-address-hexedit-modify-binary-from-the-command-line
+# param 1: file
+# param 2: offset
+# param 3: value
+    printf "$(printf '\\x%02X' $3)" | dd of="$1" bs=1 seek=$2 count=1 conv=notrunc &> /dev/null
+}
+
+
+##############################################################################
+# parse command line arguments
+##############################################################################
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -h|--help)
+    displayhelp
+    exit 0
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+DATASET=$(realpath "$1")
+
+##############################################################################
+# test the options
+##############################################################################
+
+if [ -z ${DATASET} ]; then
+echoerr ERROR: dataset directory must be specified
+exit 1
+fi
+
+##############################################################################
+# do the work
+##############################################################################
+
+# offset should start counting at 0, not at 1
+OFFSET=777
+printf "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" | dd of="$DATASET" bs=1 seek=$OFFSET count=1 conv=notrunc &> /dev/null
+OFFSET=1032
+printf "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" | dd of="$DATASET" bs=1 seek=$OFFSET count=1 conv=notrunc &> /dev/null
+

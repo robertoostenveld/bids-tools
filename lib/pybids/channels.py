@@ -15,21 +15,20 @@ class type(Enum):
     EOG         = 8    #  ElectroOculoGram (eyes), use this if not sure if it is HEOG or VEOG
     EYEGAZE     = 9    #  Eye Tracker gaze
     FITERR      = 10   #  Fit error from each head localization coil
-    HEOG        = 11   #  Horizontal EOG
-    HEOG        = 12   #  Horizontal ElectroOculoGram (eyes)
-    HLU         = 13   #  Measured position of head and head coils
-    IEEG        = 14   #  Intracranial EEG
-    MEGGRAD     = 15   #  MEG gradiometers
-    MEGMAG      = 16   #  MEG magnetometers
-    MEGREFGRAD  = 17   #  MEG reference sensors
-    MEGREFMAG   = 18   #  MEG reference sensors
-    MISC        = 19   #  Miscellaneous
-    OTHER       = 20   #  Any other type of sensor not mentioned but still valid
-    PD          = 21   #  Photodiode
-    SYSCLOCK    = 22   #  System time showing elapsed time since trial started
-    TRIG        = 23   #  Triggers
-    VEOG        = 24   #  Vertical ElectroOculoGram (eyes)
-    PUPIL       = 25   #  Eye Tracker pupil diameter
+    HEOG        = 11   #  Horizontal ElectroOculoGram (eyes)
+    HLU         = 12   #  Measured position of head and head coils
+    IEEG        = 13   #  Intracranial EEG
+    MEGGRAD     = 14   #  MEG gradiometers
+    MEGMAG      = 15   #  MEG magnetometers
+    MEGREFGRAD  = 16   #  MEG reference sensors
+    MEGREFMAG   = 17   #  MEG reference sensors
+    MISC        = 18   #  Miscellaneous
+    OTHER       = 19   #  Any other type of sensor not mentioned but still valid
+    PD          = 20   #  Photodiode
+    SYSCLOCK    = 21   #  System time showing elapsed time since trial started
+    TRIG        = 22   #  Triggers
+    VEOG        = 23   #  Vertical ElectroOculoGram (eyes)
+    PUPIL       = 24   #  Eye Tracker pupil diameter
 
 class unit(Enum):
     # these are the base units

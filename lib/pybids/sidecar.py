@@ -94,7 +94,7 @@ dataset_description = {
     'BIDSVersion': '1.1.1',
     'License': 'n/a',
     'Name': 'n/a',
-    'ReferencesAndLinks': 'n/a'
+    'ReferencesAndLinks': ["n/a"]
 }
 
 ####################################################################################

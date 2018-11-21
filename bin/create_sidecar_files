@@ -46,31 +46,31 @@ from pybids import sidecar
 from pybids import channels
 
 def help(name):
-    print ''
-    print 'This script parses all subjects and sessions in a BIDS dataset'
-    print 'and creates the required/optional sidecar files.'
-    print ''
-    print 'Use as'
-    print '  %s [options] <datadir>' % name
-    print ''
-    print 'Supported options include the following'
-    print '  -t,--test          do not create the files, just print which files would be created'
-    print '  -f,--force         overwrite existing files, the default is not to overwrite'
-    print ''
-    print 'The default is to create all sidecar files that apply to the dataset. If'
-    print 'you specify any of the following options, only these specific sidecar'
-    print 'files will be created and all others will be skipped.'
-    print ''
-    print '  --description      create the dataset_description.json file'
-    print '  --participants     create the participants.tsv file'
-    print '  --sessions         create the sessions.tsv files (per subject)'
-    print '  --scans            create the scans.tsv files (per subject and session)'
-    print '  --anat             create the sidecar files for the specific datatype (per subject and session)'
-    print '  --meg              create the sidecar files for the specific datatype (per subject and session)'
-    print '  --eeg              create the sidecar files for the specific datatype (per subject and session)'
-    print '  --ieeg             create the sidecar files for the specific datatype (per subject and session)'
-    print '  --beh              create the sidecar files for the specific datatype (per subject and session)'
-    print ''
+    print ('')
+    print ('This script parses all subjects and sessions in a BIDS dataset')
+    print ('and creates the required/optional sidecar files.')
+    print ('')
+    print ('Use as')
+    print ('  %s [options] <datadir>' % name)
+    print ('')
+    print ('Supported options include the following')
+    print ('  -t,--test          do not create the files, just print which files would be created')
+    print ('  -f,--force         overwrite existing files, the default is not to overwrite')
+    print ('')
+    print ('The default is to create all sidecar files that apply to the dataset. If')
+    print ('you specify any of the following options, only these specific sidecar')
+    print ('files will be created and all others will be skipped.')
+    print ('')
+    print ('  --description      create the dataset_description.json file')
+    print ('  --participants     create the participants.tsv file')
+    print ('  --sessions         create the sessions.tsv files (per subject)')
+    print ('  --scans            create the scans.tsv files (per subject and session)')
+    print ('  --anat             create the sidecar files for the specific datatype (per subject and session)')
+    print ('  --meg              create the sidecar files for the specific datatype (per subject and session)')
+    print ('  --eeg              create the sidecar files for the specific datatype (per subject and session)')
+    print ('  --ieeg             create the sidecar files for the specific datatype (per subject and session)')
+    print ('  --beh              create the sidecar files for the specific datatype (per subject and session)')
+    print ('')
 
 # set the defaults
 test = False
@@ -148,9 +148,9 @@ def writeASCII(filename, data):
     else:
         prefix = ''
     if not force and os.path.exists(filename):
-        print prefix + 'skipping', filename
+        print (prefix + 'skipping', filename)
     else:
-        print prefix + 'writing', filename
+        print (prefix + 'writing', filename)
         if not test:
             with open(filename, 'w') as asciifile:
                 asciifile.write(data)
@@ -161,9 +161,9 @@ def writeJSON(filename, data):
     else:
         prefix = ''
     if not force and os.path.exists(filename):
-        print prefix + 'skipping', filename
+        print (prefix + 'skipping', filename)
     else:
-        print prefix + 'writing', filename
+        print (prefix + 'writing', filename)
         if not test:
             with open(filename, 'w') as jsonfile:
                 json.dump(data, jsonfile, indent=2)
@@ -174,9 +174,9 @@ def writeTSV(filename, data):
     else:
         prefix = ''
     if not force and os.path.exists(filename):
-        print prefix + 'skipping', filename
+        print (prefix + 'skipping', filename)
     else:
-        print prefix + 'writing', filename
+        print (prefix + 'writing', filename)
         if not test:
             with open(filename, 'w') as tsvfile:
                 writer = csv.writer(tsvfile, delimiter='\t')
@@ -208,19 +208,19 @@ def createSidecarANAT(root, sub, ses):
 
 def createSidecarDWI(root, sub, ses):
   if create_all:
-    print 'createSidecarDWI', root, sub, ses
+    print ('createSidecarDWI', root, sub, ses)
 
 def createSidecarFUNC(root, sub, ses):
   if create_all:
-    print 'createSidecarFUNC', root, sub, ses
+    print ('createSidecarFUNC', root, sub, ses)
 
 def createSidecarFMAP(root, sub, ses):
   if create_all:
-    print 'createSidecarFMAP', root, sub, ses
+    print ('createSidecarFMAP', root, sub, ses)
 
 def createSidecarBEH(root, sub, ses):
   if create_all or create_beh:
-    print 'createSidecarBEH', root, sub, ses
+    print ('createSidecarBEH', root, sub, ses)
 
 def createSidecarMEG(root, sub, ses):
   if create_all or create_meg:
@@ -247,11 +247,11 @@ def createSidecarMEG(root, sub, ses):
 
 def createSidecarEEG(root, sub, ses):
   if create_all or create_eeg:
-    print 'createSidecarEEG', root, sub, ses
+    print ('createSidecarEEG', root, sub, ses)
 
 def createSidecarIEEG(root, sub, ses):
   if create_all or create_ieeg:
-    print 'createSidecarIEEG', root, sub, ses
+    print ('createSidecarIEEG', root, sub, ses)
 
 def createSidecarScans(root, sub, ses):
   if create_all or create_scans:
@@ -422,4 +422,4 @@ if hasSub:
     for task in taskList:
         createSidecarTask(root, task)
 else:
-    print 'ERROR: this directory is not organized according to BIDS'
+    print ('ERROR: this directory is not organized according to BIDS')
